@@ -1,0 +1,28 @@
+import api from '../api/client'
+
+export const productsService = {
+  list(params = {}) {
+    return api.get('/store/products', { params }).then((r) => r.data)
+  },
+  getBySlug(slug) {
+    return api.get(`/store/products/${slug}`).then((r) => r.data)
+  },
+}
+
+export const categoriesService = {
+  list() {
+    return api.get('/store/categories').then((r) => r.data)
+  },
+}
+
+export const settingsService = {
+  get() {
+    return api.get('/store/settings').then((r) => r.data)
+  },
+}
+
+export const ordersService = {
+  create(data) {
+    return api.post('/store/orders', data).then((r) => r.data)
+  },
+}
