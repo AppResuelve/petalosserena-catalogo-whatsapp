@@ -16,10 +16,9 @@ import { ProductCard } from "../ProductCard";
 ───────────────────────────────────────────────────────────────────────── */
 const HERO_VIDEO_URL = null; // ← pon aquí la URL del .mp4 cuando tengas
 const HERO_SLIDES = [
-  // ← se usan si no hay video
-  "https://placehold.co/1920x1080/E8B4F8/ffffff?text=Pétalos+Serena",
-  "https://placehold.co/1920x1080/CB6EE4/ffffff?text=Flores+de+Tela",
-  "https://placehold.co/1920x1080/A4B090/ffffff?text=Artesanías",
+  { desktop: "/hero/imagen1pc.jpeg", mobile: "/hero/image1mobile.png" },
+  { desktop: "/hero/image2pc.jpeg", mobile: "/hero/image2mobile.jpeg" },
+  { desktop: "/hero/image3pc.jpeg", mobile: "/hero/imgen3mobile.jpg" },
 ];
 
 const FERIAS = [
@@ -109,15 +108,20 @@ function HeroMedia() {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {HERO_SLIDES.map((src, i) => (
-        <img
+      {HERO_SLIDES.map((slide, i) => (
+        <picture
           key={i}
-          src={src}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          className="absolute inset-0 transition-opacity duration-1000"
           style={{ opacity: i === current ? 1 : 0 }}
           aria-hidden="true"
-        />
+        >
+          <source media="(min-width: 768px)" srcSet={slide.desktop} />
+          <img
+            src={slide.mobile}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </picture>
       ))}
     </div>
   );
@@ -386,13 +390,21 @@ export default function Home() {
 
       {/* ══ PRESENCIAS — FERIAS Y EVENTOS ════════════════════════════════ */}
       <section
+        className="relative px-4 sm:px-6 lg:px-8"
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "6rem",
           paddingBottom: "6rem",
         }}
-        className="px-4 sm:px-6 lg:px-8"
       >
+        <img
+          src="/flores-sin-fondo-home.png"
+          alt=""
+          className="absolute top-0 left-0 w-56 md:w-72 pointer-events-none hidden md:block"
+          style={{ opacity: 0.12 }}
+          aria-hidden="true"
+        />
+
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
             <span
