@@ -1,0 +1,13 @@
+{
+  "name": "petalosserena",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./api\" --filter \"./client\" dev",
+    "build": "pnpm --filter \"./client\" build",
+    "seed": "pnpm --filter \"./api\" seed",
+    "db:migrate": "pnpm --filter \"./api\" db:migrate"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}
