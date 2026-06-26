@@ -26,72 +26,72 @@ export const siteData = {
 
   cart: {
     persistenceEnabled: true,
-    persistenceKey: 'olipetshop-cart',
-    showDeliveryModal: true,
+    persistenceKey: 'petalosserena-cart',
+    showDeliveryModal: false,
   },
 }
 
 export const content = {
   home: {
     hero: {
-      badge: 'OliPetShop',
-      title: 'Todo lo que tu mascota necesita',
-      highlightedText: 'en un solo lugar',
+      badge: 'Pétalos Serena',
+      title: 'Flores de tela artesanales',
+      highlightedText: 'que duran para siempre',
       subtitle:
-        'Alimentos, accesorios, juguetes y más. Encontrá todo para consentir a tu mejor amigo.',
+        'Ramos, arreglos y flores de tela hechos a mano. Perfectos para regalar sin fecha de vencimiento.',
       primaryButtonText: 'Ver productos',
       primaryButtonLink: '/productos',
       secondaryButtonText: 'Contactar',
       secondaryButtonLink: '/contacto',
     },
-    featuredTitle: 'Productos destacados',
-    featuredSubtitle: 'Los más elegidos por nuestros clientes',
+    featuredTitle: 'Colección',
+    featuredSubtitle: 'Nuestros trabajos más recientes',
     categoriesTitle: 'Categorías',
-    categoriesSubtitle: 'Explorá por tipo de producto',
+    categoriesSubtitle: 'Explorá por tipo de flor',
     cta: {
-      title: '¿No encontrás lo que buscás?',
-      subtitle: 'Contactanos y te ayudamos a encontrar lo que necesitás.',
-      buttonText: 'Escribinos',
+      title: '¿Tenés un pedido especial?',
+      subtitle: 'Hacemos arreglos personalizados para cualquier ocasión. Escribinos y lo charlamos.',
+      buttonText: 'Consultar presupuesto',
       buttonLink: '/contacto',
     },
   },
 
   products: {
     badge: 'Catálogo',
-    title: 'Nuestros productos',
-    subtitle: 'Encontrá lo que necesitás',
+    title: 'Nuestras flores',
+    subtitle: 'Encontrá el ramo perfecto',
     noResults: 'No hay productos que coincidan con tu búsqueda.',
     clearFilters: 'Limpiar filtros',
   },
 
   productDetail: {
-    backTo: 'Volver a productos',
+    backTo: 'Volver al catálogo',
     categoryLabel: 'Categoría',
     tagsLabel: 'Etiquetas',
     addToCart: 'Agregar al carrito',
     addedToCart: '¡Agregado!',
-    relatedTitle: 'Productos relacionados',
+    relatedTitle: 'También te puede gustar',
   },
 
   cart: {
-    title: 'Tu carrito',
-    emptyTitle: 'Tu carrito está vacío',
-    emptyMessage: 'Agregá productos para poder solicitar tu pedido.',
-    browseProducts: 'Ver productos',
+    title: 'Tu pedido',
+    emptyTitle: 'Tu pedido está vacío',
+    emptyMessage: 'Elegí tus flores favoritas para armar el ramo que querés.',
+    browseProducts: 'Ver flores',
     itemCount: '{count} producto(s)',
     subtotal: 'Subtotal',
-    total: 'Total estimado',
-    requestQuote: 'Solicitar por WhatsApp',
+    total: 'Total',
+    requestQuote: 'Encargar por WhatsApp',
     removeItem: 'Eliminar',
     clearCart: 'Vaciar carrito',
-    continueShopping: 'Seguir comprando',
+    continueShopping: 'Seguir eligiendo',
   },
 
   contact: {
     badge: 'Contacto',
     title: 'Hablemos',
     subtitle:
-      '¿Tenés alguna pregunta o necesitás una cotización? Escribinos y te respondemos a la brevedad.',
+      '¿Tenés alguna pregunta o querés un arreglo personalizado? Escribinos y te respondemos a la brevedad.',
     infoTitle: 'Encontranos',
   },
 

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Send, AlertCircle, Loader } from "lucide-react";
 import { sendContactForm } from "./services/contactService";
 import { useStore } from "./context/StoreContext";
-import { PawIcon } from "./components/ui/PawIcon";
 
 /* ── Clases compartidas para inputs ── */
 const inputClass = `
@@ -83,16 +82,31 @@ export function ContactForm() {
     return (
       <div className="rounded-2xl border border-[var(--color-border)] bg-white p-10 text-center relative overflow-hidden">
         {/* Pata de fondo */}
-        <PawIcon
-          size={160}
-          className="absolute -right-6 -bottom-6 text-[var(--color-secondary)]"
-          style={{ opacity: 0.15 }}
-        />
+        <svg
+          viewBox="0 0 60 80"
+          className="absolute -right-4 -bottom-4 text-[var(--color-lila)]"
+          style={{ width: 140, opacity: 0.12 }}
+          aria-hidden="true"
+        >
+          <path
+            d="M30 75 C10 60 0 40 5 20 C10 5 20 0 30 0 C40 0 50 5 55 20 C60 40 50 60 30 75Z"
+            fill="currentColor"
+          />
+        </svg>
 
-        {/* Ícono circular */}
         <div className="relative w-20 h-20 mx-auto mb-6">
-          <div className="w-20 h-20 rounded-full bg-[var(--color-secondary)] flex items-center justify-center">
-            <PawIcon size={40} className="text-[var(--color-text-primary)]" />
+          <div className="w-20 h-20 rounded-full bg-[var(--color-primary-light)]/40 flex items-center justify-center">
+            <svg
+              viewBox="0 0 60 80"
+              className="text-[var(--color-primary)]"
+              style={{ width: 36, opacity: 0.7 }}
+              aria-hidden="true"
+            >
+              <path
+                d="M30 75 C10 60 0 40 5 20 C10 5 20 0 30 0 C40 0 50 5 55 20 C60 40 50 60 30 75Z"
+                fill="currentColor"
+              />
+            </svg>
           </div>
           {/* Check badge */}
           <span
@@ -234,15 +248,18 @@ export function ContactForm() {
           type="submit"
           disabled={status === "loading"}
           className="inline-flex items-center justify-center gap-2
-            px-7 py-3.5 rounded-xl
+            px-7 py-3.5
             bg-[var(--color-primary)] text-white font-semibold text-sm
             hover:bg-[var(--color-primary-hover)]
             hover:-translate-y-0.5
-            hover:shadow-[0_6px_20px_rgba(199,4,4,0.35)]
             active:translate-y-0 active:shadow-none
             transition-all duration-200
             disabled:opacity-50 disabled:cursor-not-allowed
             disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          style={{
+            borderRadius: "2rem",
+            boxShadow: "0 4px 14px rgba(203,110,228,0.35)",
+          }}
         >
           {status === "loading" ? (
             <>

@@ -2,7 +2,32 @@ import { MapPin, Mail, Clock, MessageCircle, ArrowRight } from "lucide-react";
 import { content } from "../../data/siteData";
 import { useStore } from "../context/StoreContext";
 import { ContactForm } from "../ContactForm";
-import { PawIcon } from "../components/ui/PawIcon";
+
+function ThinLine({ className = "", style = {} }) {
+  return (
+    <div
+      className={`h-px ${className}`}
+      style={{ backgroundColor: "var(--color-border)", ...style }}
+    />
+  );
+}
+
+function PetalDeco({ className = "", style = {} }) {
+  return (
+    <svg
+      viewBox="0 0 60 80"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <path
+        d="M30 75 C10 60 0 40 5 20 C10 5 20 0 30 0 C40 0 50 5 55 20 C60 40 50 60 30 75Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 function BottomWave({ toColor, flip = false }) {
   return (
@@ -29,7 +54,6 @@ function BottomWave({ toColor, flip = false }) {
   );
 }
 
-/* ── Card de dato de contacto ─────────────────────────────────────────── */
 function InfoCard({
   icon: Icon,
   label,
@@ -42,13 +66,13 @@ function InfoCard({
     flex items-start gap-4 p-5 rounded-2xl bg-white
     border border-[var(--color-border)]
     hover:border-[var(--color-primary)]/30
-    hover:shadow-[0_4px_20px_rgba(199,4,4,0.08)]
+    hover:shadow-[0_4px_20px_rgba(203,110,228,0.08)]
     transition-all duration-200
   `;
   const content = (
     <>
-      <div className="w-11 h-11 rounded-xl bg-[var(--color-secondary)] flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-[var(--color-text-primary)]" />
+      <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-light)]/40 flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-[var(--color-primary)]" />
       </div>
       <div>
         <p className="text-xs font-bold tracking-widest uppercase text-[var(--color-text-muted)] mb-1">
@@ -70,34 +94,22 @@ function InfoCard({
   return <Tag className={base}>{content}</Tag>;
 }
 
-/* ── Horarios helper ──────────────────────────────────────────────────── */
 function useFormattedSchedules(store) {
   const DAY_NAMES = {
-    mon: "Lunes",
-    tue: "Martes",
-    wed: "Miércoles",
-    thu: "Jueves",
-    fri: "Viernes",
-    sat: "Sábado",
-    sun: "Domingo",
+    mon: "Lunes", tue: "Martes", wed: "Miércoles", thu: "Jueves",
+    fri: "Viernes", sat: "Sábado", sun: "Domingo",
   };
   const DAY_ORDER = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 7 };
-  const schedules = Array.isArray(store?.business_hours)
-    ? store.business_hours
-    : [];
+  const schedules = Array.isArray(store?.business_hours) ? store.business_hours : [];
   return schedules
     .map((block) => {
       if (!block.days?.length || !block.timeRanges?.length) return null;
-      const sorted = [...block.days].sort(
-        (a, b) => DAY_ORDER[a] - DAY_ORDER[b],
-      );
+      const sorted = [...block.days].sort((a, b) => DAY_ORDER[a] - DAY_ORDER[b]);
       const daysLabel =
         sorted.length > 2
           ? `${DAY_NAMES[sorted[0]].slice(0, 3)} a ${DAY_NAMES[sorted[sorted.length - 1]].slice(0, 3)}`
           : sorted.map((d) => DAY_NAMES[d]).join(" y ");
-      const timesLabel = block.timeRanges
-        .map((r) => `${r.open} - ${r.close}`)
-        .join(" / ");
+      const timesLabel = block.timeRanges.map((r) => `${r.open} - ${r.close}`).join(" / ");
       return { days: daysLabel, times: timesLabel };
     })
     .filter(Boolean);
@@ -114,56 +126,66 @@ export default function Contact() {
 
   return (
     <>
-      {/* ══ HERO — fondo amarillo suave con onda roja de salida ══ */}
+      {/* ══ HERO — crema floral ══ */}
       <section
         className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
         style={{
-          backgroundColor: "#fefce8",
+          backgroundColor: "var(--color-background)",
           paddingTop: "4rem",
           paddingBottom: "6rem",
         }}
       >
-        {/* Patas decorativas de fondo */}
-        <PawIcon
-          size={160}
-          className="absolute top-6 right-[8%] text-[var(--color-primary)] hidden md:block"
-          style={{ opacity: 0.07 }}
+        <PetalDeco
+          className="absolute top-6 right-[8%] text-[var(--color-lila)] hidden md:block"
+          style={{ width: 150, opacity: 0.1 }}
         />
-        <PawIcon
-          size={112}
-          className="absolute -bottom-4 left-[4%] text-[var(--color-secondary)] hidden md:block"
-          style={{ opacity: 0.4, transform: "rotate(-15deg)" }}
+        <PetalDeco
+          className="absolute -bottom-4 left-[4%] text-[var(--color-accent)] hidden md:block"
+          style={{ width: 100, opacity: 0.25, transform: "rotate(-15deg)" }}
         />
-        <PawIcon
-          size={80}
-          className="absolute top-1/2 left-[45%] text-[var(--color-primary)] hidden lg:block"
-          style={{ opacity: 0.04, transform: "rotate(10deg) translateY(-50%)" }}
+        <PetalDeco
+          className="absolute top-1/2 left-[45%] text-[var(--color-lila)] hidden lg:block"
+          style={{ width: 70, opacity: 0.06, transform: "rotate(10deg) translateY(-50%)" }}
         />
 
         <div className="relative max-w-7xl mx-auto">
-          {/* Eyebrow */}
-          <span className="inline-block text-xs font-bold tracking-widest uppercase text-[var(--color-primary)] mb-4">
-            Contacto
-          </span>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px w-8" style={{ backgroundColor: "var(--color-accent)" }} />
+            <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "var(--color-accent)" }}>
+              Contacto
+            </span>
+          </div>
 
           <h1
-            className="text-4xl md:text-5xl font-black tracking-tight leading-[1.05]
-            text-[var(--color-text-primary)] mb-5 max-w-2xl"
+            className="max-w-2xl mb-5"
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
+              fontWeight: 400,
+              lineHeight: 1.05,
+              color: "var(--color-text-primary)",
+            }}
           >
             {title}
           </h1>
-          <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-xl">
+          <p
+            className="max-w-xl"
+            style={{
+              color: "var(--color-text-secondary)",
+              fontSize: "0.95rem",
+              lineHeight: 1.7,
+            }}
+          >
             {subtitle}
           </p>
 
-          {/* Línea decorativa del sistema */}
-          <div className="flex items-center mt-6 gap-2">
-            <div className="h-1 w-12 rounded-full bg-[var(--color-secondary)]" />
-            <div className="h-1 w-4 rounded-full bg-[var(--color-primary)]" />
+          <div className="flex items-center gap-3 mt-6">
+            <div className="h-px w-10" style={{ backgroundColor: "var(--color-border-hover)" }} />
+            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--color-lila)", opacity: 0.7 }} />
+            <div className="h-px w-24" style={{ backgroundColor: "var(--color-border-hover)" }} />
           </div>
         </div>
 
-        {/* Onda de salida amarillo → blanco */}
         <BottomWave toColor="#ffffff" />
       </section>
 
@@ -173,36 +195,42 @@ export default function Contact() {
           <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
             {/* ── Columna izquierda: Formulario ── */}
             <div>
-              {/* Header de sección */}
               <div className="mb-8">
-                <span className="inline-block text-xs font-bold tracking-widest uppercase text-[var(--color-primary)] mb-2">
-                  Escribinos
-                </span>
-                <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-px w-6" style={{ backgroundColor: "var(--color-accent)" }} />
+                  <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "var(--color-accent)" }}>
+                    Escribinos
+                  </span>
+                </div>
+                <h2 className="text-2xl font-normal text-[var(--color-text-primary)] mb-1" style={{ fontFamily: "var(--font-heading)" }}>
                   Envianos tu mensaje
                 </h2>
                 <div className="flex items-center gap-2 mt-3">
-                  <div className="h-1 w-10 rounded-full bg-[var(--color-secondary)]" />
-                  <div className="h-1 w-3 rounded-full bg-[var(--color-primary)]" />
+                  <div className="h-px w-8" style={{ backgroundColor: "var(--color-border-hover)" }} />
+                  <div className="w-1 h-1 rounded-full" style={{ backgroundColor: "var(--color-lila)", opacity: 0.7 }} />
+                  <div className="h-px w-16" style={{ backgroundColor: "var(--color-border-hover)" }} />
                 </div>
               </div>
 
-              {/* ContactForm vive acá — sin wrapper extra, el form ya tiene su card */}
               <ContactForm />
             </div>
 
             {/* ── Columna derecha: Info de contacto ── */}
             <div>
               <div className="mb-8">
-                <span className="inline-block text-xs font-bold tracking-widest uppercase text-[var(--color-primary)] mb-2">
-                  Encontranos
-                </span>
-                <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-px w-6" style={{ backgroundColor: "var(--color-accent)" }} />
+                  <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "var(--color-accent)" }}>
+                    Encontranos
+                  </span>
+                </div>
+                <h2 className="text-2xl font-normal text-[var(--color-text-primary)]" style={{ fontFamily: "var(--font-heading)" }}>
                   {infoTitle}
                 </h2>
                 <div className="flex items-center gap-2 mt-3">
-                  <div className="h-1 w-10 rounded-full bg-[var(--color-secondary)]" />
-                  <div className="h-1 w-3 rounded-full bg-[var(--color-primary)]" />
+                  <div className="h-px w-8" style={{ backgroundColor: "var(--color-border-hover)" }} />
+                  <div className="w-1 h-1 rounded-full" style={{ backgroundColor: "var(--color-lila)", opacity: 0.7 }} />
+                  <div className="h-px w-16" style={{ backgroundColor: "var(--color-border-hover)" }} />
                 </div>
               </div>
 
@@ -227,11 +255,7 @@ export default function Contact() {
                 )}
 
                 {store?.email && (
-                  <InfoCard
-                    icon={Mail}
-                    label="Email"
-                    href={`mailto:${store.email}`}
-                  >
+                  <InfoCard icon={Mail} label="Email" href={`mailto:${store.email}`}>
                     {store.email}
                   </InfoCard>
                 )}
@@ -245,9 +269,8 @@ export default function Contact() {
                             {s.days}
                           </span>
                           <span
-                            className="text-xs font-medium
-                            bg-[var(--color-secondary)]/30 text-[var(--color-text-primary)]
-                            px-2 py-0.5 rounded-md inline-block w-fit"
+                            className="text-xs font-medium px-2 py-0.5 rounded-md inline-block w-fit"
+                            style={{ backgroundColor: "var(--color-primary-light)", color: "var(--color-primary)" }}
                           >
                             {s.times}
                           </span>
@@ -262,13 +285,13 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* ══ MAPA — full width con borde y onda de entrada ══ */}
+      {/* ══ MAPA ══ */}
       {store?.address && (
         <section className="relative bg-white px-4 sm:px-6 lg:px-8 pb-0">
           <div className="max-w-7xl mx-auto">
             <div
-              className="rounded-3xl overflow-hidden border border-[var(--color-border)]
-              shadow-[0_4px_24px_rgba(0,0,0,0.07)]"
+              className="rounded-3xl overflow-hidden border border-[var(--color-border)]"
+              style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}
             >
               <iframe
                 title={`Mapa de ${store.address}`}
@@ -285,14 +308,10 @@ export default function Contact() {
         </section>
       )}
 
-      {/* ══ CTA WHATSAPP — cierre oscuro consistente con footer ══ */}
+      {/* ══ CTA WHATSAPP ══ */}
       {whatsappNumber && (
         <>
-          {/* Onda blanco → oscuro */}
-          <div
-            className="bg-white overflow-hidden leading-none"
-            aria-hidden="true"
-          >
+          <div className="bg-white overflow-hidden leading-none" aria-hidden="true">
             <svg
               viewBox="0 0 1440 64"
               xmlns="http://www.w3.org/2000/svg"
@@ -307,26 +326,24 @@ export default function Contact() {
           </div>
 
           <section className="bg-[#1a1a1a] relative overflow-hidden px-4 sm:px-6 lg:px-8 py-14">
-            {/* Patas watermark */}
-            <PawIcon
-              size={160}
-              className="absolute right-8 top-4 text-white pointer-events-none hidden md:block"
-              style={{ opacity: 0.04 }}
+            <PetalDeco
+              className="absolute right-6 top-4 text-white pointer-events-none hidden md:block"
+              style={{ width: 120, opacity: 0.04 }}
             />
-            <PawIcon
-              size={112}
-              className="absolute left-4 bottom-2 text-[var(--color-secondary)] pointer-events-none hidden md:block"
-              style={{ opacity: 0.07 }}
+            <PetalDeco
+              className="absolute left-4 bottom-2 text-[var(--color-lila)] pointer-events-none hidden md:block"
+              style={{ width: 80, opacity: 0.1 }}
             />
 
             <div className="max-w-xl mx-auto text-center relative">
-              <span
-                className="inline-block text-xs font-bold tracking-widest uppercase
-                text-[var(--color-secondary)] mb-4"
-              >
-                Respuesta rápida
-              </span>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="h-px w-8" style={{ backgroundColor: "var(--color-lila)", opacity: 0.4 }} />
+                <span className="text-xs font-medium tracking-[0.2em] uppercase" style={{ color: "var(--color-lila)", opacity: 0.8 }}>
+                  Respuesta rápida
+                </span>
+                <div className="h-px w-8" style={{ backgroundColor: "var(--color-lila)", opacity: 0.4 }} />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-normal text-white mb-3" style={{ fontFamily: "var(--font-heading)" }}>
                 ¿Preferís hablar por WhatsApp?
               </h2>
               <p className="text-white/60 text-sm mb-8">
@@ -336,15 +353,21 @@ export default function Contact() {
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5
-                  px-8 py-4 rounded-xl font-bold text-sm
-                  bg-[var(--color-secondary)] text-[var(--color-text-primary)]
-                  hover:bg-[var(--color-secondary-muted)]
-                  hover:-translate-y-0.5
-                  hover:shadow-[0_6px_20px_rgba(239,242,58,0.3)]
-                  transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2.5 px-8 py-4 font-bold text-sm text-white transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  borderRadius: "2rem",
+                  boxShadow: "0 4px 14px rgba(203,110,228,0.35)",
+                }}
               >
-                <WhatsAppIcon className="w-5 h-5 shrink-0" />
+                <svg
+                  className="w-5 h-5 shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                </svg>
                 Escribinos por WhatsApp
                 <ArrowRight className="w-4 h-4" />
               </a>
@@ -353,18 +376,5 @@ export default function Contact() {
         </>
       )}
     </>
-  );
-}
-
-function WhatsAppIcon({ className = "" }) {
-  return (
-    <svg
-      className={className}
-      fill="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-    </svg>
   );
 }

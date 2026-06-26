@@ -45,7 +45,7 @@ export default function StorePages() {
     <>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
-        <TopBanner text="¡Bienvenidos a OliPetShop!" dismissible={true} />
+        <TopBanner text="🌸 Pétalos Serena — Flores de tela artesanales" dismissible={true} />
         <Navbar heroMode={location.pathname === "/"} />
         <main className="flex-1">
           <Routes>
@@ -57,7 +57,7 @@ export default function StorePages() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <Footer waveFromColor={isHome ? "#c70404" : "#ffffff"} />
+        <Footer waveFromColor={isHome ? "#CB6EE4" : "#ffffff"} />
         <FloatingWhatsAppButton />
       </div>
     </>
