@@ -10,7 +10,6 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import { TopBanner } from "./components/shared/TopBanner";
 import { FloatingWhatsAppButton } from "./components/ui/FloatingWhatsAppButton";
 
 export default function StorePages() {
@@ -44,7 +43,6 @@ export default function StorePages() {
     <>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
-        <TopBanner text="🌸 Pétalos Serena — Flores de tela artesanales" dismissible={true} />
         <Navbar heroMode={location.pathname === "/"} />
         <main className="flex-1">
           <Routes>
