@@ -229,20 +229,14 @@ export function Footer({ waveFromColor }) {
                 <img
                   src={store.logo_url}
                   alt={store.business_name || ""}
-                  className="h-16 w-auto object-contain"
+                  className="h-24 w-auto object-contain"
                 />
               ) : (
-                <span
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.4rem",
-                    fontWeight: 400,
-                    color: "#ffffff",
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  {store?.business_name || "Pétalos Serena"}
-                </span>
+                <img
+                  src="/logotipo.png"
+                  alt={store?.business_name || "Pétalos Serena"}
+                  className="h-24 w-auto object-contain"
+                />
               )}
             </div>
             <p

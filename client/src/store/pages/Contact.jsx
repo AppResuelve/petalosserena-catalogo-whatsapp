@@ -131,7 +131,7 @@ export default function Contact() {
         className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
         style={{
           backgroundColor: "var(--color-background)",
-          paddingTop: "4rem",
+          paddingTop: "5rem",
           paddingBottom: "6rem",
         }}
       >

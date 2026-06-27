@@ -70,23 +70,14 @@ export function Navbar({ heroMode = false }) {
                 <img
                   src={siteData.company.logo}
                   alt={siteData.business?.name || ""}
-                  className="h-10 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
               ) : (
-                <span
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.4rem",
-                    fontWeight: 500,
-                    color: isTransparent
-                      ? "#ffffff"
-                      : "var(--color-text-primary)",
-                    letterSpacing: "0.02em",
-                    transition: "color 0.5s",
-                  }}
-                >
-                  {siteData.business?.name || "Pétalos Serena"}
-                </span>
+                <img
+                  src="/logotipo.png"
+                  alt={siteData.business?.name || "Pétalos Serena"}
+                  className="h-12 w-auto object-contain"
+                />
               )}
             </Link>
 

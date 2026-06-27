@@ -22,15 +22,14 @@ export default function StorePages() {
     if (store?.business_name) {
       document.title = store.business_name;
     }
-    if (store?.favicon_url) {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "icon";
-        document.head.appendChild(link);
-      }
-      link.href = store.favicon_url;
+    const faviconUrl = store?.favicon_url || "/logotipo.png";
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
     }
+    link.href = faviconUrl;
   }, [store?.business_name, store?.favicon_url]);
 
   if (loading) return null;

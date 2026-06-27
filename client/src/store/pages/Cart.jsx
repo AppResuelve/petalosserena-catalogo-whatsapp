@@ -178,7 +178,7 @@ export default function Cart() {
         className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
         style={{
           backgroundColor: "var(--color-background)",
-          paddingTop: "3rem",
+          paddingTop: "5rem",
           paddingBottom: "3rem",
         }}
       >

@@ -26,28 +26,19 @@ const FERIAS = [
     id: 1,
     name: "Feria Nacional del Poncho",
     location: "Catamarca",
-    date: "Julio 2025",
+    date: "Julio 2026",
     description:
       "Una de las ferias artesanales más importantes del país. Encontranos en el stand de flores y accesorios.",
-    image: "https://placehold.co/600x400/A4B090/ffffff?text=Feria+del+Poncho",
+    image: "/image-feria-poncho.webp",
   },
   {
     id: 2,
     name: "Feria de Artesanos",
-    location: "Resistencia, Chaco",
-    date: "Todos los sábados",
+    location: "Mar del Plata, Buenos Aires",
+    date: "Todos los sábados y domingos",
     description:
       "Feria local donde podés ver y tocar nuestras creaciones de cerca.",
-    image: "https://placehold.co/600x400/E8B4F8/ffffff?text=Feria+Local",
-  },
-  {
-    id: 3,
-    name: "Expo Flores & Diseño",
-    location: "Buenos Aires",
-    date: "Agosto 2025",
-    description:
-      "Expo dedicada a la florería artesanal y el diseño floral contemporáneo.",
-    image: "https://placehold.co/600x400/CB6EE4/ffffff?text=Expo+Flores",
+    image: "/image-feria-artesanos-mardelplata.jpg",
   },
 ];
 
@@ -212,14 +203,16 @@ export default function Home() {
   const { hero, featuredTitle, featuredSubtitle, cta } = content.home;
   const { productsMap } = useStore();
 
-  const featuredProducts = useMemo(() =>
-    Object.values(productsMap)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 5)
-  , [productsMap]);
+  const featuredProducts = useMemo(
+    () =>
+      Object.values(productsMap)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 5),
+    [productsMap],
+  );
 
   return (
-    <>
+    <main className="overflow-hidden">
       {/* ══ HERO — video/carrusel fullscreen ══════════════════════════════ */}
       <section className="relative h-screen min-h-[600px] flex items-end overflow-hidden">
         <HeroMedia />
@@ -347,9 +340,16 @@ export default function Home() {
 
       {/* ══ PRODUCTOS DESTACADOS ══════════════════════════════════════════ */}
       <section
-        className="bg-white px-4 sm:px-6 lg:px-8"
+        className="bg-white px-4 sm:px-6 lg:px-8 relative"
         style={{ paddingTop: "6rem", paddingBottom: "6rem" }}
       >
+        <img
+          src="/flores-sin-fondo-home3.webp"
+          alt=""
+          className="absolute -top-32 -right-6 md:-top-40 w-48 md:w-72 pointer-events-none"
+          aria-hidden="true"
+        />
+
         <div className="max-w-7xl mx-auto">
           {/* Header de sección — minimalista */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
@@ -398,9 +398,9 @@ export default function Home() {
         }}
       >
         <img
-          src="/flores-sin-fondo-home.png"
+          src="/flores-sin-fondo-home.webp"
           alt=""
-          className="absolute top-0 left-0 w-56 md:w-72 pointer-events-none hidden md:block"
+          className="absolute top-0 left-0 w-40 sm:w-56 md:w-72 pointer-events-none"
           style={{ opacity: 0.12 }}
           aria-hidden="true"
         />
@@ -425,7 +425,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {FERIAS.map((feria) => (
               <article
                 key={feria.id}
@@ -503,22 +503,35 @@ export default function Home() {
 
       {/* ══ SECCIÓN PRESUPUESTO EVENTO ═══════════════════════════════════ */}
       <section
-        className="bg-white px-4 sm:px-6 lg:px-8 overflow-hidden"
-        style={{ paddingTop: "6rem", paddingBottom: "6rem" }}
+        className="bg-white px-4 sm:px-6 lg:px-8 overflow-hidden pt-20 sm:pt-0 md:pt-20"
+        style={{ paddingBottom: "6rem" }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Imagen mock — reemplazar */}
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+            {/* Imagen de eventos con fade hacia el texto */}
+            <div className="relative aspect-[4/3] rounded-t-2xl rounded-b-none md:rounded-b-2xl md:rounded-r-none overflow-hidden">
               <img
-                src="https://placehold.co/800x600/E8B4F8/ffffff?text=Decoración+Evento"
+                src="/image-eventos.webp"
                 alt="Decoración floral para eventos"
                 className="w-full h-full object-cover"
               />
-              {/* Pétalo decorativo superpuesto */}
-              <PetalDeco
-                className="absolute -bottom-4 -right-4 w-24 h-32 pointer-events-none"
-                style={{ color: "var(--color-lila)", opacity: 0.3 }}
+              {/* Desktop: difuminado a la derecha (hacia el texto) */}
+              <div
+                className="absolute inset-0 hidden md:block"
+                style={{
+                  background:
+                    "linear-gradient(to right, transparent 40%, white 100%)",
+                }}
+                aria-hidden="true"
+              />
+              {/* Mobile: difuminado abajo (hacia el texto) */}
+              <div
+                className="absolute inset-0 md:hidden"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent 40%, white 100%)",
+                }}
+                aria-hidden="true"
               />
             </div>
 
@@ -612,6 +625,15 @@ export default function Home() {
         }}
         className="px-4 sm:px-6 lg:px-8 relative overflow-hidden"
       >
+        {/* Flor decorativa sin fondo */}
+        <img
+          src="/flores-sin-fondo-home2.webp"
+          alt=""
+          className="absolute -bottom-8 -left-4 w-44 md:w-56 pointer-events-none hidden lg:block"
+          style={{ opacity: 0.22, transform: "rotate(-8deg)" }}
+          aria-hidden="true"
+        />
+
         {/* Pétalos decorativos de fondo */}
         <PetalDeco
           className="absolute -left-8 top-8 w-32 h-44 pointer-events-none hidden lg:block"
@@ -701,6 +723,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-    </>
+    </main>
   );
 }
