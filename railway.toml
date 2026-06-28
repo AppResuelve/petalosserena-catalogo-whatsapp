@@ -3,4 +3,4 @@
   configPath = "api"
 
 [deploy]
-  startCommand = "npx sequelize-cli db:migrate && node src/index.js"
+  startCommand = "cd api && npx sequelize-cli db:migrate && node src/index.js"
