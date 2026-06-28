@@ -42,7 +42,7 @@ function CartEmpty({ emptyTitle, emptyMessage, browseProducts }) {
         className="relative overflow-hidden px-4 sm:px-6 lg:px-8"
         style={{
           backgroundColor: "var(--color-background)",
-          paddingTop: "3.5rem",
+          paddingTop: "5rem",
           paddingBottom: "5rem",
         }}
       >
@@ -51,16 +51,27 @@ function CartEmpty({ emptyTitle, emptyMessage, browseProducts }) {
           style={{ width: 120, opacity: 0.12 }}
         />
         <div className="relative max-w-7xl mx-auto">
-          <span className="inline-block text-xs font-bold tracking-widest uppercase text-[var(--color-primary)] mb-3">
-            Carrito
-          </span>
-          <h1
-            className="text-4xl md:text-5xl font-normal tracking-tight text-[var(--color-text-primary)] mb-2"
-            style={{ fontFamily: "var(--font-heading)" }}
+          <Link
+            to="/productos"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold
+              text-[var(--color-text-muted)] hover:text-[var(--color-primary)]
+              transition-colors mb-5 group"
           >
-            {emptyTitle}
-          </h1>
-          <ThinLine className="w-16 my-4" />
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            {content.productDetail.backTo}
+          </Link>
+          <div>
+            <span className="inline-block text-xs font-bold tracking-widest uppercase text-[var(--color-primary)] mb-3">
+              Carrito
+            </span>
+            <h1
+              className="text-4xl md:text-5xl font-normal tracking-tight text-[var(--color-text-primary)] mb-2"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {emptyTitle}
+            </h1>
+            <ThinLine className="w-16 my-4" />
+          </div>
         </div>
       </section>
 
@@ -157,6 +168,9 @@ export default function Cart() {
     window.open(whatsappLink, "_blank");
   };
 
+  const productItems = items.filter(i => i.type !== 'service')
+  const serviceItems = items.filter(i => i.type === 'service')
+
   const handleRequest = () => {
     const message = generateWhatsAppMessage();
     openWhatsApp(message);
@@ -236,10 +250,21 @@ export default function Cart() {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-10">
             {/* ── Items ── */}
-            <div className="lg:col-span-2 space-y-4">
-              {items.map((item) => (
-                <CartItem key={item.id} item={item} />
-              ))}
+            <div className="lg:col-span-2 space-y-6">
+              {productItems.length > 0 && (
+                <>
+                  <h3 className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--color-text-muted)" }}>Productos</h3>
+                  <div className="border-t border-[var(--color-border)]" />
+                  {productItems.map((item) => <CartItem key={item.id} item={item} />)}
+                </>
+              )}
+              {serviceItems.length > 0 && (
+                <>
+                  <h3 className="text-xs font-bold tracking-widest uppercase mt-2" style={{ color: "var(--color-text-muted)" }}>Servicios</h3>
+                  <div className="border-t border-[var(--color-border)]" />
+                  {serviceItems.map((item) => <CartItem key={item.id} item={item} />)}
+                </>
+              )}
               <Link
                 to="/productos"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors group mt-2"

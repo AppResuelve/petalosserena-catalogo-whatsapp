@@ -14,15 +14,15 @@ import Media from './pages/dashboard/Media'
 import ChangeRequests from './pages/dashboard/ChangeRequests'
 import Services from './pages/dashboard/Services'
 import ServiceForm from './pages/dashboard/ServiceForm'
+import Attributes from './pages/dashboard/Attributes'
 import StorePage from './pages/store/Store'
-import TestGreen from './pages/TestGreen'
 import Activate from './pages/Activate'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 
 export default function AdminApp() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ScrollToTop />
       <AuthProvider>
         <AlertProvider>
@@ -36,6 +36,7 @@ export default function AdminApp() {
               <Route path="/dashboard/products" element={<Products />} />
               <Route path="/dashboard/products/new" element={<ProductForm />} />
               <Route path="/dashboard/products/:id/edit" element={<ProductForm />} />
+              <Route path="/dashboard/attributes" element={<Attributes />} />
               <Route path="/dashboard/categories" element={<Categories />} />
               <Route path="/dashboard/settings" element={<Settings />} />
               <Route path="/dashboard/media" element={<Media />} />
@@ -45,7 +46,6 @@ export default function AdminApp() {
               <Route path="/dashboard/services/:id/edit" element={<ServiceForm />} />
               <Route path="/store" element={<StorePage />} />
             </Route>
-            <Route path="/test-green" element={<TestGreen />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

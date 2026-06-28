@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -47,52 +45,88 @@ html {
   scroll-behavior: smooth;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* ── Store scope ── */
+.store-root h1,
+.store-root h2,
+.store-root h3,
+.store-root h4,
+.store-root h5,
+.store-root h6 {
   font-family: var(--font-heading);
 }
 
-body,
-p,
-span,
-li,
-td,
-input,
-textarea,
-button,
-a,
-label {
+.store-root body,
+.store-root p,
+.store-root span,
+.store-root li,
+.store-root td,
+.store-root input,
+.store-root textarea,
+.store-root button,
+.store-root a,
+.store-root label {
   font-family: var(--font-body);
 }
 
+/* ── Admin scope ── */
+.admin-root {
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ── Body global ── */
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-::selection {
+.store-root body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+.admin-root body {
+  background-color: #09090b;
+  color: #f4f4f5;
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ── Selection ── */
+.store-root ::selection {
   background-color: rgba(203, 110, 228, 0.15);
   color: var(--color-text-primary);
 }
 
+.admin-root ::selection {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: #f4f4f5;
+}
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
 }
-::-webkit-scrollbar-track {
+
+.store-root ::-webkit-scrollbar-track {
   background: var(--color-surface);
 }
-::-webkit-scrollbar-thumb {
+.store-root ::-webkit-scrollbar-thumb {
   background: var(--color-lila);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
+.store-root ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
+}
+
+.admin-root ::-webkit-scrollbar-track {
+  background: #18181b;
+}
+.admin-root ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+.admin-root ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
 }

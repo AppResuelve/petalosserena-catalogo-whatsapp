@@ -15,7 +15,7 @@ import {
   PieChart,
   MoreHorizontal,
   Eye,
-  EyeOff,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../components/ui/AlertContext";
@@ -25,6 +25,7 @@ import api from "../../api/admin";
 const ADMIN_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/dashboard/products", icon: Package, label: "Productos" },
+  { to: "/dashboard/attributes", icon: SlidersHorizontal, label: "Atributos" },
   { to: "/dashboard/services", icon: Briefcase, label: "Servicios" },
   { to: "/dashboard/categories", icon: Tags, label: "Categorías" },
   { to: "/dashboard/media", icon: Image, label: "Galería" },

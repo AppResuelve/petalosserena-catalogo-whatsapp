@@ -8,7 +8,7 @@ export function ProductCard({ product }) {
   const quantity = getItemQuantity(product.id);
 
   const hasDiscount = product.discountPercentage;
-  const hasWholesale = product.wholesalePrice && product.unitsToWholesalePrice;
+  const hasWholesale = product.wholesalePrice && product.wholesaleMinQty;
 
   const getBadgeVariant = (tag) => {
     if (tag === "nuevo") return "new";
@@ -24,7 +24,7 @@ export function ProductCard({ product }) {
 
   const handleAddWholesale = (e) => {
     e.preventDefault();
-    addItem(product.id, product.unitsToWholesalePrice);
+    addItem(product.id, product.wholesaleMinQty);
   };
 
   return (
@@ -135,7 +135,7 @@ export function ProductCard({ product }) {
                 className="text-xs mb-1"
                 style={{ color: "var(--color-text-secondary)" }}
               >
-                mayorista (a partir de {product.unitsToWholesalePrice} u.)
+                mayorista (a partir de {product.wholesaleMinQty} u.)
               </p>
               <div className="flex items-center gap-1 mb-1">
                 <span
@@ -211,7 +211,7 @@ export function ProductCard({ product }) {
                 e.currentTarget.style.color = "var(--color-primary)";
               }}
             >
-              Agregar por {product.unitsToWholesalePrice} u.
+              Agregar por {product.wholesaleMinQty} u.
             </button>
           )}
         </div>

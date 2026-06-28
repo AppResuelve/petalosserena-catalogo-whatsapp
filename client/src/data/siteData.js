@@ -4,6 +4,7 @@ export const siteData = {
     items: [
       { label: 'Inicio', href: '/' },
       { label: 'Productos', href: '/productos' },
+      { label: 'Servicios', href: '/servicios' },
       { label: 'Carrito', href: '/carrito', showCartCount: true },
       { label: 'Contacto', href: '/contacto' },
     ],
@@ -17,6 +18,7 @@ export const siteData = {
         links: [
           { label: 'Inicio', href: '/' },
           { label: 'Productos', href: '/productos' },
+          { label: 'Servicios', href: '/servicios' },
           { label: 'Carrito', href: '/carrito' },
           { label: 'Contacto', href: '/contacto' },
         ],
@@ -101,5 +103,20 @@ export const content = {
     message: 'Lo sentimos, la página que buscás no existe o fue movida.',
     buttonText: 'Volver al inicio',
     buttonLink: '/',
+  },
+
+  services: {
+    badge: 'Servicios',
+    title: 'Nuestros servicios',
+    subtitle: 'Decoración y arreglos para eventos',
+    noResults: 'No hay servicios disponibles en este momento.',
+  },
+
+  serviceDetail: {
+    backTo: 'Volver a servicios',
+    addToCart: 'Agregar al carrito',
+    addedToCart: '¡Agregado!',
+    requestWhatsApp: 'Pedir por WhatsApp',
+    duration: 'Duración estimada',
   },
 }

@@ -26,3 +26,12 @@ export const ordersService = {
     return api.post('/store/orders', data).then((r) => r.data)
   },
 }
+
+export const servicesService = {
+  list(params = {}) {
+    return api.get('/store/services', { params }).then((r) => r.data)
+  },
+  getBySlug(slug) {
+    return api.get(`/store/services/${slug}`).then((r) => r.data)
+  },
+}

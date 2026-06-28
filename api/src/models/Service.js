@@ -37,5 +37,9 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'services',
   })
 
+  Service.associate = (models) => {
+    Service.hasMany(models.ServiceVariant, { foreignKey: 'service_id', as: 'variants' })
+  }
+
   return Service
 }

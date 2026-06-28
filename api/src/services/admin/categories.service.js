@@ -41,6 +41,12 @@ const update = async (id, data) => {
   if (!data.slug && data.name) {
     data.slug = slugify(data.name)
   }
+  if (data.slug && data.slug !== category.slug) {
+    const existing = await Category.findOne({ where: { slug: data.slug } })
+    if (existing && existing.id !== category.id) {
+      throw Object.assign(new Error('Ya existe una categoría con ese slug'), { status: 400 })
+    }
+  }
   return category.update(data)
 }
 

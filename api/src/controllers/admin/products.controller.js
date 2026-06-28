@@ -1,5 +1,5 @@
 const productsService = require('../../services/admin/products.service')
-const { validateProduct, validateBulkProducts } = require('../../validations/product.schema')
+const { validateProduct, validateProductUpdate, validateBulkProducts } = require('../../validations/product.schema')
 
 const list = async (req, res, next) => {
   try {
@@ -31,7 +31,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = validateProduct(req.body)
+    const data = validateProductUpdate(req.body)
     const product = await productsService.update(req.params.id, data)
     res.json(product)
   } catch (err) {

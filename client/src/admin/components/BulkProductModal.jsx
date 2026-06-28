@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import * as XLSX from 'xlsx'
-import { Upload, FileSpreadsheet, AlertTriangle, ChevronDown } from 'lucide-react'
+import { Upload, FileSpreadsheet, AlertTriangle, ChevronDown, Download } from 'lucide-react'
 import { Button } from './ui/Form'
 import { Modal } from './ui/Modal'
 import { useAlert } from './ui/AlertContext'
@@ -22,8 +22,13 @@ const OPTIONAL_FIELDS = [
   { key: 'comparePrice', label: 'Precio de comparación', aliases: ['precio_original', 'compare_price', 'precio_anterior'] },
   { key: 'wholesalePrice', label: 'Precio mayorista', aliases: ['mayorista', 'wholesale', 'precio_mayorista'] },
   { key: 'wholesaleMinQty', label: 'Cant. mín. mayorista', aliases: ['unidades_mayorista', 'wholesale_min', 'cantidad_mayorista', 'min_mayorista'] },
+  { key: 'stock', label: 'Stock', aliases: ['stock', 'cantidad', 'inventario', 'disponible'] },
+  { key: 'sku', label: 'Código SKU', aliases: ['sku', 'codigo', 'code', 'cod'] },
   { key: 'images', label: 'URL imagen', aliases: ['imagen', 'image', 'foto', 'url_imagen', 'img'] },
 ]
+
+const ATTR_COL_PATTERN = /^(atributo|attr)[\s_-]?(\d+)$/i
+const VAL_COL_PATTERN = /^(valor|val)[\s_-]?(\d+)$/i
 
 function detectColumn(headers, aliases) {
   const lower = headers.map((h) => h.toLowerCase().trim())
@@ -34,46 +39,97 @@ function detectColumn(headers, aliases) {
   return ''
 }
 
-function parseProducts(rawData, nameCol, priceCol, optionals) {
+function parseProducts(rawData, nameCol, priceCol, optionals, attrPairs) {
   const products = []
   const errors = []
+  const grouped = {}
 
   rawData.rows.forEach((row, i) => {
     const name = String(row[nameCol] ?? '').trim()
     const price = row[priceCol]
 
-    if (!name) {
-      errors.push(`Fila ${i + 2}: falta el nombre`)
-      return
-    }
+    if (!name) { errors.push(`Fila ${i + 2}: falta el nombre`); return }
     if (price == null || price === '' || isNaN(Number(price)) || Number(price) < 0) {
       errors.push(`Fila ${i + 2}: "${name}" — precio inválido`)
       return
     }
 
-    const p = {
-      name,
-      slug: slugify(name),
-      price: Number(price),
-    }
+    const key = name.toLowerCase()
 
-    for (const { key } of OPTIONAL_FIELDS) {
-      const col = optionals[key]
-      if (!col || row[col] == null || row[col] === '') continue
-      if (key === 'images') {
-        p[key] = String(row[col])
-      } else if (key === 'description') {
-        p[key] = String(row[col])
-      } else {
-        const num = Number(row[col])
-        if (!isNaN(num)) p[key] = num
+    if (!grouped[key]) {
+      grouped[key] = {
+        name,
+        slug: slugify(name),
+        price: Number(price),
+        skus: [],
+      }
+      for (const { key: fKey } of OPTIONAL_FIELDS) {
+        if (fKey === 'sku') continue  // SKU-level, handled below
+        const col = optionals[fKey]
+        if (!col || row[col] == null || row[col] === '') continue
+        if (fKey === 'images' || fKey === 'description') grouped[key][fKey] = String(row[col])
+        else { const num = Number(row[col]); if (!isNaN(num)) grouped[key][fKey] = num }
       }
     }
 
-    products.push(p)
+    // Build SKU from attribute columns
+    const attrValues = []
+    attrPairs.forEach(({ attrCol, valCol, num }) => {
+      const attrName = String(row[attrCol] ?? '').trim()
+      const value = String(row[valCol] ?? '').trim()
+      if (attrName && value) attrValues.push({ attrName, value })
+    })
+
+    if (attrValues.length > 0) {
+      grouped[key].skus.push({
+        retailPrice: Number(row[priceCol]) || Number(price),
+        stock: optionals['stock'] && row[optionals['stock']] != null ? Number(row[optionals['stock']]) || 0 : 0,
+        sku: optionals['sku'] && row[optionals['sku']] != null ? String(row[optionals['sku']]).trim() : null,
+        attrValues,
+      })
+    }
   })
 
+  for (const p of Object.values(grouped)) {
+    if (p.skus.length === 0) {
+      // Producto simple: usar stock del producto
+      const stock = p.stock || 0
+      delete p.stock
+      products.push(p)
+    } else {
+      products.push(p)
+    }
+  }
+
   return { products, errors }
+}
+
+function downloadTemplate() {
+  const headers = [
+    'nombre', 'descripcion', 'precio', 'stock',
+    'precio_mayorista', 'cantidad_mayorista',
+    'descuento', 'imagen', 'sku',
+    'atributo_1', 'valor_1', 'atributo_2', 'valor_2',
+  ]
+  const example1 = [
+    'Remera básica', 'Remera de algodón', 1500, 10,
+    '', '', '', '', '',
+    'Color', 'Rojo', 'Talle', 'M',
+  ]
+  const example2 = [
+    'Remera básica', '', 1800, 5,
+    '', '', '', '', '',
+    'Color', 'Rojo', 'Talle', 'XL',
+  ]
+  const example3 = [
+    'Alfajor chocolate', 'Sin variantes', 1400, 100,
+    1000, 12, '', '', '',
+    '', '', '', '',
+  ]
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.aoa_to_sheet([headers, example1, example2, example3])
+  XLSX.utils.book_append_sheet(wb, ws, 'Productos')
+  XLSX.writeFile(wb, 'plantilla-productos.xlsx')
 }
 
 export default function BulkProductModal({ open, onClose, categories, onCreated }) {
@@ -86,6 +142,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
   const [nameCol, setNameCol] = useState('')
   const [priceCol, setPriceCol] = useState('')
   const [optionals, setOptionals] = useState({})
+  const [attrPairs, setAttrPairs] = useState([])
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [readError, setReadError] = useState('')
   const [createdCount, setCreatedCount] = useState(0)
@@ -96,8 +153,8 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
 
   const { products: parsed, errors } = useMemo(() => {
     if (!rawData || !nameCol || !priceCol) return { products: [], errors: [] }
-    return parseProducts(rawData, nameCol, priceCol, optionals)
-  }, [rawData, nameCol, priceCol, optionals])
+    return parseProducts(rawData, nameCol, priceCol, optionals, attrPairs)
+  }, [rawData, nameCol, priceCol, optionals, attrPairs])
 
   useEffect(() => {
     setPreviewPage(1)
@@ -114,6 +171,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     setNameCol('')
     setPriceCol('')
     setOptionals({})
+    setAttrPairs([])
     setShowAdvanced(false)
     setFileName(file.name)
 
@@ -144,6 +202,20 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
         setOptionals(detected)
         if (Object.keys(detected).length > 0) setShowAdvanced(true)
 
+        // Detect attribute columns: atributo_N / valor_N pairs
+        const pairs = []
+        const lowerHeaders = headers.map(h => h.toLowerCase().trim())
+        let n = 1
+        while (n <= 10) {
+          const attrIdx = lowerHeaders.findIndex(h => ATTR_COL_PATTERN.test(h) && ATTR_COL_PATTERN.exec(h)[2] === String(n))
+          const valIdx = lowerHeaders.findIndex(h => VAL_COL_PATTERN.test(h) && VAL_COL_PATTERN.exec(h)[2] === String(n))
+          if (attrIdx !== -1 && valIdx !== -1) {
+            pairs.push({ attrCol: headers[attrIdx], valCol: headers[valIdx], num: n })
+          } else { break }
+          n++
+        }
+        setAttrPairs(pairs)
+
         setStep('mapping')
       } catch {
         setReadError('No se pudo leer el archivo. Verificá que sea .xlsx o .csv válido.')
@@ -160,11 +232,32 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
 
     if (final.length === 0) return
 
+    // Alert for new attributes
+    if (attrPairs.length > 0) {
+      const attrNames = [...new Set(final.flatMap(p =>
+        (p.skus || []).flatMap(s => s.attrValues.map(av => av.attrName))
+      ))]
+      if (attrNames.length > 0) {
+        await Alert.fire({
+          message: `Se crearán ${attrNames.length} atributo(s): ${attrNames.join(', ')}`,
+          type: 'info',
+          variant: 'banner',
+          duration: 4000,
+        })
+      }
+    }
+
     setStep('creating')
+
+    const payload = final.map(p => {
+      const { skus, stock, ...productData } = p
+      if (skus?.length > 0) return { ...productData, skus }
+      return productData
+    })
 
     try {
       const { data } = await api.post('/admin/products/bulk', {
-        products: final,
+        products: payload,
         categoryId: categoryId || null,
       })
 
@@ -205,6 +298,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     setNameCol('')
     setPriceCol('')
     setOptionals({})
+    setAttrPairs([])
     setShowAdvanced(false)
     setReadError('')
     setFileName('')
@@ -219,6 +313,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     setNameCol('')
     setPriceCol('')
     setOptionals({})
+    setAttrPairs([])
     setShowAdvanced(false)
     setReadError('')
     setFileName('')
@@ -280,6 +375,11 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
               {readError}
             </div>
           )}
+
+          <button type="button" onClick={downloadTemplate}
+            className="flex items-center gap-1.5 text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+            <Download className="w-3.5 h-3.5" /> Descargar plantilla
+          </button>
 
           <div className="flex justify-end">
             <Button type="button" variant="secondary" onClick={handleClose}>Cancelar</Button>
@@ -410,6 +510,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
                       <th className="text-left px-3 py-2 font-medium">Nombre</th>
                       <th className="text-left px-3 py-2 font-medium">Slug</th>
                       <th className="text-right px-3 py-2 font-medium">Precio</th>
+                      {attrPairs.length > 0 && <th className="text-center px-3 py-2 font-medium">Variantes</th>}
                       {hasExtraCols && extraCols.map(({ key, label }) => (
                         <th key={key} className="text-right px-3 py-2 font-medium">{label}</th>
                       ))}
@@ -423,6 +524,11 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
                         <td className="px-3 py-2 text-right tabular-nums">
                           {`$${p.price.toLocaleString('es-AR')}`}
                         </td>
+                        {attrPairs.length > 0 && (
+                          <td className="px-3 py-2 text-center">
+                            <span className="text-xs text-cyan-400">{p.skus?.length || 0}</span>
+                          </td>
+                        )}
                         {hasExtraCols && extraCols.map(({ key }) => (
                           <td key={key} className="px-3 py-2 text-right text-xs text-zinc-400">
                             {key === 'images' ? (p[key] ? '✓' : '—') : p[key] ?? '—'}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { X, ArrowLeft } from "lucide-react";
-import { PawIcon } from "./components/ui/PawIcon";
 
 /* ── Clases de input compartidas ── */
 const inputClass = `
@@ -101,12 +100,11 @@ export function CheckoutModal({
           {/* Handle mobile */}
           <div className="w-10 h-1 rounded-full bg-[var(--color-border)] mx-auto mb-4 sm:hidden" />
 
-          {/* Pata decorativa de fondo */}
-          <PawIcon
-            size={56}
-            className="absolute right-4 top-2 text-[var(--color-secondary)]"
-            style={{ opacity: 0.3 }}
-          />
+          {/* Pétalo decorativo de fondo */}
+          <svg viewBox="0 0 60 80" className="absolute right-4 top-2 text-[var(--color-lila)]"
+            style={{ width: 56, opacity: 0.3 }} aria-hidden="true">
+            <path d="M30 75 C10 60 0 40 5 20 C10 5 20 0 30 0 C40 0 50 5 55 20 C60 40 50 60 30 75Z" fill="currentColor" />
+          </svg>
 
           <button
             onClick={onClose}

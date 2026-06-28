@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Tag, Check } from "lucide-react";
 import { content } from "../../data/siteData";
@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { addItem, getItemQuantity } = useCart();
   const [justAdded, setJustAdded] = useState(false);
+  const [selectedValues, setSelectedValues] = useState({});
 
   const { product, loading } = useProduct(slug);
   const categoryId = product?.categoryId;
@@ -22,6 +23,50 @@ export default function ProductDetail() {
     categoryId,
     product?.id,
   );
+
+  const skus = useMemo(() => product?.skus || [], [product])
+
+  const attributeGroups = useMemo(() => {
+    const groups = {}
+    skus.forEach(sku => {
+      sku.attributeValues.forEach(av => {
+        if (!av.attribute) return
+        const aId = av.attribute.id
+        if (!groups[aId]) groups[aId] = { name: av.attribute.name, ids: [], valueMap: {} }
+        if (!groups[aId].valueMap[av.id]) {
+          groups[aId].ids.push(av.id)
+          groups[aId].valueMap[av.id] = av.value
+        }
+      })
+    })
+    return Object.entries(groups).map(([aId, g]) => ({
+      attributeId: Number(aId),
+      name: g.name,
+      ids: g.ids,
+      valueMap: g.valueMap,
+    }))
+  }, [skus])
+
+  const derivedSku = useMemo(() => {
+    const selected = Object.values(selectedValues).filter(Boolean)
+    if (!selected.length) return skus[0]
+    return skus.find(sku =>
+      selected.every(vId => sku.attributeValues.some(av => av.id === vId))
+    ) || skus[0]
+  }, [skus, selectedValues])
+
+  const price = derivedSku ? derivedSku.retailPrice : product?.retailPrice
+  const wholesalePrice = derivedSku?.wholesalePrice ?? product?.wholesalePrice
+  const wholesaleMinQty = derivedSku?.wholesaleMinQty ?? product?.wholesaleMinQty
+  const hasWholesale = wholesalePrice && wholesaleMinQty
+
+  // Auto-seleccionar primer valor de cada grupo
+  useEffect(() => {
+    if (!attributeGroups.length || Object.keys(selectedValues).length) return
+    const init = {}
+    attributeGroups.forEach(g => { if (g.ids.length > 0) init[g.attributeId] = g.ids[0] })
+    setSelectedValues(init)
+  }, [attributeGroups])
 
   /* ── Loading ── */
   if (loading) {
@@ -71,20 +116,20 @@ export default function ProductDetail() {
     .slice(0, 4);
 
   const handleAddToCart = () => {
-    addItem(product.id);
+    addItem(product.id, 1, derivedSku?.id)
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);
   };
 
   const handleAddWholesale = () => {
-    addItem(product.id, product.unitsToWholesalePrice);
+    const qty = wholesaleMinQty || product.wholesaleMinQty
+    addItem(product.id, qty, derivedSku?.id)
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);
   };
 
   const quantity = getItemQuantity(product.id);
   const hasDiscount = product.discountPercentage;
-  const hasWholesale = product.wholesalePrice && product.unitsToWholesalePrice;
 
   return (
     <section
@@ -120,17 +165,19 @@ export default function ProductDetail() {
           {/* Info */}
           <div>
             {/* Categoría */}
-            <div className="mb-5">
-              <span
-                className="inline-block px-3 py-1 text-xs font-medium rounded-full"
-                style={{
-                  backgroundColor: "var(--color-primary-light)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                {product.category}
-              </span>
-            </div>
+            {product.category && (
+              <div className="mb-5">
+                <span
+                  className="inline-block px-3 py-1 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: "var(--color-primary-light)",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  {product.category}
+                </span>
+              </div>
+            )}
 
             {/* Nombre */}
             <h1
@@ -147,15 +194,17 @@ export default function ProductDetail() {
             </h1>
 
             {/* Descripción corta */}
-            <p
-              className="mb-6 leading-relaxed"
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "0.95rem",
-              }}
-            >
-              {product.shortDescription}
-            </p>
+            {product.shortDescription && (
+              <p
+                className="mb-6 leading-relaxed"
+                style={{
+                  color: "var(--color-text-secondary)",
+                  fontSize: "0.95rem",
+                }}
+              >
+                {product.shortDescription}
+              </p>
+            )}
 
             {/* Línea decorativa */}
             <div className="flex items-center gap-3 mb-6" aria-hidden="true">
@@ -173,6 +222,36 @@ export default function ProductDetail() {
               />
             </div>
 
+            {/* Selector de variantes por atributo */}
+            {attributeGroups.length >= 1 && (
+              <div className="mb-4 space-y-4">
+                {attributeGroups.map(group => (
+                  <div key={group.attributeId}>
+                    <p className="text-xs font-medium mb-2" style={{ color: "var(--color-text-muted)" }}>{group.name}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.ids.map(vId => {
+                        const selected = selectedValues[group.attributeId] === vId
+                        return (
+                          <button
+                            key={vId}
+                            onClick={() => setSelectedValues(prev => ({ ...prev, [group.attributeId]: vId }))}
+                            className="text-xs px-3 py-1.5 rounded-full border transition-all"
+                            style={{
+                              borderColor: selected ? "var(--color-primary)" : "var(--color-border)",
+                              backgroundColor: selected ? "var(--color-primary-light)" : "transparent",
+                              color: selected ? "var(--color-primary)" : "var(--color-text-secondary)",
+                            }}
+                          >
+                            {group.valueMap[vId]}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Precio minorista */}
             <div className="mb-1">
               <div className="flex items-center gap-2">
@@ -183,7 +262,7 @@ export default function ProductDetail() {
                     color: "var(--color-primary)",
                   }}
                 >
-                  {formatPrice(product.retailPrice)}
+                  {formatPrice(price)}
                 </span>
                 <span
                   className="text-sm"
@@ -192,7 +271,7 @@ export default function ProductDetail() {
                   x 1 u.
                 </span>
               </div>
-              {hasDiscount && (
+              {product.discountPercentage && product.comparePrice && (
                 <span
                   className="text-base line-through"
                   style={{ color: "var(--color-text-muted)" }}
@@ -215,7 +294,7 @@ export default function ProductDetail() {
                   className="text-xs font-medium mb-2"
                   style={{ color: "var(--color-primary)" }}
                 >
-                  Precio mayorista · a partir de {product.unitsToWholesalePrice}{" "}
+                  Precio mayorista · a partir de {wholesaleMinQty}{" "}
                   unidades
                 </p>
                 <div className="flex items-center gap-2">
@@ -226,7 +305,7 @@ export default function ProductDetail() {
                       color: "var(--color-primary)",
                     }}
                   >
-                    {formatPrice(product.wholesalePrice)}
+                    {formatPrice(wholesalePrice)}
                   </span>
                   <span
                     className="text-xs"
@@ -235,14 +314,6 @@ export default function ProductDetail() {
                     x 1 u.
                   </span>
                 </div>
-                {product.wholesaleComparePrice && (
-                  <span
-                    className="text-sm line-through"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {formatPrice(product.wholesaleComparePrice)}
-                  </span>
-                )}
               </div>
             )}
 
@@ -265,16 +336,18 @@ export default function ProductDetail() {
             )}
 
             {/* Descripción larga */}
-            <p
-              className="leading-relaxed mb-8"
-              style={{
-                color: "var(--color-text-secondary)",
-                fontSize: "0.9rem",
-                lineHeight: 1.8,
-              }}
-            >
-              {product.description}
-            </p>
+            {product.description && (
+              <p
+                className="leading-relaxed mb-8"
+                style={{
+                  color: "var(--color-text-secondary)",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.8,
+                }}
+              >
+                {product.description}
+              </p>
+            )}
 
             {/* Botón principal — pill violeta */}
             <button
@@ -325,7 +398,7 @@ export default function ProductDetail() {
                   e.currentTarget.style.color = "var(--color-primary)";
                 }}
               >
-                Agregar por {product.unitsToWholesalePrice} u. (mayorista)
+                Agregar por {wholesaleMinQty} u. (mayorista)
               </button>
             )}
           </div>

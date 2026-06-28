@@ -7,6 +7,13 @@ const THEME = {
   info:    { border: 'border-cyan-500',  text: 'text-cyan-400',  bgIcon: 'bg-cyan-500/10',  icon: 'ℹ️' },
 }
 
+const SPANISH_TYPE = {
+  success: 'Éxito',
+  warning: 'Advertencia',
+  error: 'Error',
+  info: 'Información',
+}
+
 export default function CustomAlert({
   type = 'success',
   variant = 'banner',
@@ -86,10 +93,10 @@ export default function CustomAlert({
       >
         <div className={`relative flex flex-col gap-2 p-4 bg-zinc-900 border-l-4 ${theme.border}
                         rounded-xl shadow-xl border border-zinc-800`}>
-          <div className="flex items-end gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-lg">{theme.icon}</span>
             <p className={`text-sm font-bold uppercase tracking-wide ${theme.text}`}>
-              {title || type}
+              {title || SPANISH_TYPE[type] || type}
             </p>
           </div>
           <p className="text-sm text-zinc-300 font-medium leading-tight">{message}</p>
@@ -113,7 +120,7 @@ export default function CustomAlert({
           </div>
 
           <h3 className="text-xl font-bold text-zinc-100 mb-2">
-            {title || (input ? inputLabel || 'Ingresá un valor' : 'Atención')}
+            {title || (input ? inputLabel || 'Ingresá un valor' : SPANISH_TYPE[type] || 'Atención')}
           </h3>
 
           <p className="text-zinc-400 text-sm leading-relaxed mb-6">{message}</p>

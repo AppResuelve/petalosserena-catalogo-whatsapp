@@ -13,7 +13,21 @@ const productSchema = z.object({
   status: z.enum(['active', 'draft']).optional(),
   tags: z.array(z.string()).optional(),
   categoryId: z.number().nullable().optional(),
+  skus: z.array(z.object({
+    id: z.number().int().optional(),
+    retailPrice: z.number().min(0).optional(),
+    wholesalePrice: z.number().nullable().optional(),
+    wholesaleMinQty: z.number().int().nullable().optional(),
+    stock: z.number().int().optional(),
+    sku: z.string().nullable().optional(),
+    images: z.array(z.string()).optional(),
+    sortOrder: z.number().int().optional(),
+    status: z.enum(['active', 'draft']).optional(),
+    attributeValueIds: z.array(z.number().int()).optional(),
+  })).optional(),
 })
+
+const productUpdateSchema = productSchema.partial()
 
 const bulkProductSchema = z.array(z.object({
   name: z.string().min(1),
@@ -26,12 +40,34 @@ const bulkProductSchema = z.array(z.object({
   discountPercentage: z.number().int().min(1).max(100).nullable().optional(),
   wholesalePrice: z.number().nullable().optional(),
   wholesaleMinQty: z.number().int().nullable().optional(),
+  skus: z.array(z.object({
+    retailPrice: z.number().optional(),
+    wholesalePrice: z.number().nullable().optional(),
+    wholesaleMinQty: z.number().int().nullable().optional(),
+    stock: z.number().int().optional(),
+    sku: z.string().nullable().optional(),
+    images: z.array(z.string()).optional(),
+    status: z.enum(['active', 'draft']).optional(),
+    attrValues: z.array(z.object({
+      attrName: z.string(),
+      value: z.string(),
+    })).optional(),
+  })).optional(),
 }))
 
 function validateProduct(body) {
   const result = productSchema.safeParse(body)
   if (!result.success) {
-    const message = result.error.errors.map(e => e.message).join(', ')
+    const message = result.error.issues.map(e => e.message).join(', ')
+    throw Object.assign(new Error(message), { status: 400 })
+  }
+  return result.data
+}
+
+function validateProductUpdate(body) {
+  const result = productUpdateSchema.safeParse(body)
+  if (!result.success) {
+    const message = result.error.issues.map(e => e.message).join(', ')
     throw Object.assign(new Error(message), { status: 400 })
   }
   return result.data
@@ -40,10 +76,10 @@ function validateProduct(body) {
 function validateBulkProducts(body) {
   const result = bulkProductSchema.safeParse(body.products)
   if (!result.success) {
-    const message = result.error.errors.map(e => e.message).join(', ')
+    const message = result.error.issues.map(e => e.message).join(', ')
     throw Object.assign(new Error(message), { status: 400 })
   }
   return result.data
 }
 
-module.exports = { productSchema, bulkProductSchema, validateProduct, validateBulkProducts }
+module.exports = { productSchema, productUpdateSchema, bulkProductSchema, validateProduct, validateProductUpdate, validateBulkProducts }

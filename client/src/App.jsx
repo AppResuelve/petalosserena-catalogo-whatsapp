@@ -9,5 +9,7 @@ export default function App() {
     || pathname.startsWith('/dashboard')
     || pathname.startsWith('/activate')
 
-  return isAdmin ? <AdminApp /> : <StoreApp />
+  return isAdmin
+    ? <div className="admin-root"><AdminApp /></div>
+    : <div className="store-root"><StoreApp /></div>
 }
