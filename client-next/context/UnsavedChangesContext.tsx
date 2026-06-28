@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { useAlert } from '@/admin/components/ui/AlertContext'
+import { useAlert } from '@/components/admin/ui/AlertContext'
 
 interface UnsavedChangesCtx {
   isDirty: boolean
