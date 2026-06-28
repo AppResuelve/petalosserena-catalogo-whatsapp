@@ -1,13 +1,10 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { baseMetadata } from "@/lib/metadata"
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: "Pétalos Serena",
-  description: "Flores de tela artesanales que duran para siempre",
-  icons: [{ url: "/logotipo.png" }],
-}
+export const metadata: Metadata = baseMetadata as Metadata
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
