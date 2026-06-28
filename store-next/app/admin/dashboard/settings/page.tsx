@@ -5,10 +5,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/navigation"
 import { Loader } from 'lucide-react'
-import { Button, Input, Textarea } from '@/admin/components/ui/Form'
-import { Card } from '@/admin/components/ui/Card'
-import ImageUpload from '@/admin/components/ImageUpload'
-import ScheduleInput from '@/admin/components/ScheduleInput'
+import { Button, Input, Textarea } from '@/components/admin/ui/Form'
+import { Card } from '@/components/admin/ui/Card'
+import ImageUpload from '@/components/admin/ImageUpload'
+import ScheduleInput from '@/components/admin/ScheduleInput'
 import api from '@/services/admin-api'
 
 const DEFAULT_SETTINGS = {

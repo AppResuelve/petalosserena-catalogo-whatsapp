@@ -4,15 +4,15 @@ import { useState } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus, Search, Edit, Trash2, FileSpreadsheet, Loader, MoreHorizontal } from 'lucide-react'
-import { Button } from '@/admin/components/ui/Form'
-import { Table } from '@/admin/components/ui/Table'
-import { Modal } from '@/admin/components/ui/Modal'
-import BulkProductModal from '@/admin/components/BulkProductModal'
+import { Button } from '@/components/admin/ui/Form'
+import { Table } from '@/components/admin/ui/Table'
+import { Modal } from '@/components/admin/ui/Modal'
+import BulkProductModal from '@/components/admin/BulkProductModal'
 import { useProducts } from '@/hooks/admin-useProducts'
 import { useCategories } from '@/hooks/admin-useCategories'
-import { useAlert } from '@/admin/components/ui/AlertContext'
+import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
-import { formatPrice } from '@/admin/lib/utils'
+import { formatPrice } from '@/components/admin/lib/utils'
 
 export default function Products() {
   const router = useRouter()

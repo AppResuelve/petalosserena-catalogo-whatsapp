@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, PieChart } from 'lucide-react'
-import { useAuth } from '@/admin/context/AuthContext'
-import { Button } from '@/admin/components/ui/Form'
+import { useAuth } from '@/components/admin/context/AuthContext'
+import { Button } from '@/components/admin/ui/Form'
 
 export default function Login() {
   const [email, setEmail] = useState('')

@@ -5,11 +5,11 @@ import { useEffect, useState } from "react"
 import { Menu } from "lucide-react"
 import dynamic from "next/dynamic"
 import { usePathname, useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/admin/context/AuthContext"
-import { AlertProvider } from "@/admin/components/ui/AlertContext"
+import { AuthProvider, useAuth } from "@/components/admin/context/AuthContext"
+import { AlertProvider } from "@/components/admin/ui/AlertContext"
 import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext"
 
-const Sidebar = dynamic(() => import("@/admin/components/Sidebar"), { ssr: false })
+const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), { ssr: false })
 
 const PAGE_TITLES = {
   '/dashboard': 'Dashboard',

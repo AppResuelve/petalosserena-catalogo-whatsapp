@@ -18,6 +18,7 @@ export function productMetadata(product: any) {
   return {
     title: product?.name,
     description: desc,
+    alternates: { canonical: `${BASE_URL}/productos/${product?.slug}` },
     openGraph: {
       title: product?.name,
       description: desc,
@@ -32,6 +33,7 @@ export function serviceMetadata(service: any) {
   return {
     title: service?.name,
     description: desc,
+    alternates: { canonical: `${BASE_URL}/servicios/${service?.slug}` },
     openGraph: {
       title: service?.name,
       images: service?.images?.[0] ? [service.images[0]] : undefined,

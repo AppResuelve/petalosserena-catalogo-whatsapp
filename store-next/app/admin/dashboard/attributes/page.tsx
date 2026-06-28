@@ -2,8 +2,8 @@
 'use client'
 import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Loader, ChevronUp, ChevronDown } from "lucide-react";
-import { Button, Input } from "@/admin/components/ui/Form";
-import { useAlert } from "@/admin/components/ui/AlertContext";
+import { Button, Input } from "@/components/admin/ui/Form";
+import { useAlert } from "@/components/admin/ui/AlertContext";
 import api from "@/services/admin-api";
 
 export default function Attributes() {

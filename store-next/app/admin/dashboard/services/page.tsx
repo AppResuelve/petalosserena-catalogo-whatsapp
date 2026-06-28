@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus, Search, Edit, Trash2, Loader } from 'lucide-react'
-import { Button } from '@/admin/components/ui/Form'
-import { Table } from '@/admin/components/ui/Table'
-import { useAlert } from '@/admin/components/ui/AlertContext'
+import { Button } from '@/components/admin/ui/Form'
+import { Table } from '@/components/admin/ui/Table'
+import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
-import { formatPrice } from '@/admin/lib/utils'
+import { formatPrice } from '@/components/admin/lib/utils'
 
 export default function Services() {
   const router = useRouter()

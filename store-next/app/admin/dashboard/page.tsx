@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 import { Store, Package, Tags, TrendingUp } from 'lucide-react'
-import { Card } from '@/admin/components/ui/Card'
+import { Card } from '@/components/admin/ui/Card'
 import { useDashboard } from '@/hooks/admin-useDashboard'
 
 const STORE_STATUS_MAP = {

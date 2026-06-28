@@ -2,10 +2,10 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Upload, Trash2, Copy, Check, Loader, RotateCcw } from 'lucide-react'
-import { Button } from '@/admin/components/ui/Form'
-import { Card } from '@/admin/components/ui/Card'
+import { Button } from '@/components/admin/ui/Form'
+import { Card } from '@/components/admin/ui/Card'
 import { uploadImage } from '@/services/admin-api'
-import { useAlert } from '@/admin/components/ui/AlertContext'
+import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
 
 const TABS = [

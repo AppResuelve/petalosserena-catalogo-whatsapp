@@ -2,11 +2,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react'
-import { Button, Input } from '@/admin/components/ui/Form'
-import { Modal } from '@/admin/components/ui/Modal'
+import { Button, Input } from '@/components/admin/ui/Form'
+import { Modal } from '@/components/admin/ui/Modal'
 import { useCategories } from '@/hooks/admin-useCategories'
 import api from '@/services/admin-api'
-import { useAlert } from '@/admin/components/ui/AlertContext'
+import { useAlert } from '@/components/admin/ui/AlertContext'
 
 const slugify = (text) =>
   text

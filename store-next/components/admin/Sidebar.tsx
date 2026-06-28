@@ -21,9 +21,9 @@ import {
   Eye,
   SlidersHorizontal,
 } from "lucide-react";
-import { useAuth } from "@/admin/context/AuthContext";
-import { useAlert } from "@/admin/components/ui/AlertContext";
-import { Modal } from "@/admin/components/ui/Modal";
+import { useAuth } from "@/components/admin/context/AuthContext";
+import { useAlert } from "@/components/admin/ui/AlertContext";
+import { Modal } from "@/components/admin/ui/Modal";
 import api from "@/services/admin-api";
 import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
