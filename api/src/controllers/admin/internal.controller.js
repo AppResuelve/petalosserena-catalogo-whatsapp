@@ -170,4 +170,82 @@ const seedServices = async (req, res, next) => {
   }
 }
 
-module.exports = { createAdmin, seedSettings, seedProducts, seedServices }
+const getAdminStatus = async (req, res, next) => {
+  try {
+    const admin = await User.findOne({
+      where: { role: 'admin' },
+      attributes: ['status', 'activationSentAt', 'activationExpires'],
+    })
+
+    if (!admin) {
+      return res.json({ exists: false })
+    }
+
+    const now = new Date()
+    const sentAt = admin.activationSentAt ? new Date(admin.activationSentAt) : null
+    const expires = admin.activationExpires ? new Date(admin.activationExpires) : null
+    const secondsSinceSent = sentAt ? Math.floor((now - sentAt) / 1000) : Infinity
+
+    let canResend = false
+    if (admin.status === 'pending' && secondsSinceSent >= 60) {
+      canResend = true
+    }
+
+    return res.json({
+      exists: true,
+      status: admin.status,
+      activationSentAt: sentAt?.toISOString() || null,
+      activationExpiresAt: expires?.toISOString() || null,
+      canResend,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+const resendActivation = async (req, res, next) => {
+  try {
+    const admin = await User.findOne({ where: { role: 'admin' } })
+    if (!admin) {
+      return res.status(404).json({ error: 'No hay administrador creado' })
+    }
+
+    if (admin.status === 'active') {
+      return res.status(409).json({ error: 'El administrador ya está activado' })
+    }
+
+    const now = new Date()
+    const sentAt = admin.activationSentAt ? new Date(admin.activationSentAt) : null
+    const secondsSinceSent = sentAt ? Math.floor((now - sentAt) / 1000) : Infinity
+
+    if (secondsSinceSent < 60) {
+      const waitSeconds = 60 - secondsSinceSent
+      return res.status(429).json({
+        error: `Esperá ${waitSeconds} segundos antes de reenviar`,
+        retryAfter: waitSeconds,
+      })
+    }
+
+    const token = crypto.randomBytes(32).toString('hex')
+    const hash = crypto.createHash('sha256').update(token).digest('hex')
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+    await admin.update({
+      activationTokenHash: hash,
+      activationExpires: expires,
+      activationSentAt: now,
+    })
+
+    const origin = process.env.STORE_FRONTEND_URL || process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'
+    const adminOrigin = origin.replace(/^http:\/\//, '').includes('admin.') ? origin : origin.replace(/^https?:\/\//, 'https://admin.')
+    const link = `${adminOrigin}/activate/${token}`
+
+    await emailService.sendActivationEmail(admin.email, link)
+
+    res.json({ success: true })
+  } catch (err) {
+    next(err)
+  }
+}
+
+module.exports = { createAdmin, seedSettings, seedProducts, seedServices, getAdminStatus, resendActivation }
