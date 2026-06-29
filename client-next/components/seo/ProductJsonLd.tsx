@@ -8,7 +8,7 @@ type ProductProps = {
 }
 
 export function ProductJsonLd({ product }: { product: ProductProps }) {
-  const base = process.env.NEXT_PUBLIC_URL || 'https://petalosserena.com.ar'
+  const base = process.env.NEXT_PUBLIC_STORE_URL || 'https://petalosserena.com.ar'
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',

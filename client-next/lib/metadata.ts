@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_URL || 'https://petalosserena.com.ar'
+const BASE_URL = process.env.NEXT_PUBLIC_STORE_URL || 'https://petalosserena.com.ar'
 
 export const baseMetadata = {
   title: {

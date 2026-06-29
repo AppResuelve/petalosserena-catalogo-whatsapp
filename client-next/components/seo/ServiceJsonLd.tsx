@@ -7,7 +7,7 @@ type ServiceProps = {
 }
 
 export function ServiceJsonLd({ service }: { service: ServiceProps }) {
-  const base = process.env.NEXT_PUBLIC_URL || 'https://petalosserena.com.ar'
+  const base = process.env.NEXT_PUBLIC_STORE_URL || 'https://petalosserena.com.ar'
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Service',
