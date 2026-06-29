@@ -61,6 +61,7 @@ export default function Sidebar({ open, onClose, logoUrl }) {
   const [pwOpen, setPwOpen] = useState(false);
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [pwError, setPwError] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
   const [showPw, setShowPw] = useState(false);
