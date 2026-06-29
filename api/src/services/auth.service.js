@@ -108,7 +108,7 @@ const forgotPassword = async (email) => {
 
   const origin = process.env.STORE_FRONTEND_URL || process.env.CORS_ORIGIN?.split(',')[1] || process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'
   const adminOrigin = origin.replace(/^http:\/\//, '').includes('admin.') ? origin : origin.replace(/^https?:\/\//, 'https://admin.')
-  const link = `${adminOrigin}/reset-password?token=${token}`
+  const link = `${adminOrigin}/reset/${token}`
 
   await emailService.sendResetPasswordEmail(email, link)
 
