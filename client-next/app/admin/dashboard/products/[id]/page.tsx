@@ -130,6 +130,7 @@ export default function ProductForm() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [priceDefaults, setPriceDefaults] = useState({ retail: true, wholesale: true })
+  const [attrDropdownOpen, setAttrDropdownOpen] = useState(false)
 
   const { isDirty, setIsDirty, confirmLeave } = useUnsavedChanges()
 
@@ -595,21 +596,26 @@ export default function ProductForm() {
             <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 sm:rounded-t-2xl shrink-0">
               <h3 className="text-lg font-bold text-zinc-100">Administrar atributos</h3>
               {attributes.filter(a => !modalAttrs[a.id]).length > 0 && (
-                <div className="relative group">
-                  <button type="button"
+                <div className="relative">
+                  <button type="button" onClick={() => setAttrDropdownOpen(!attrDropdownOpen)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-cyan-400 border border-zinc-700 hover:border-cyan-500 transition-colors">
                     <Plus className="w-3 h-3" />
                     <span className="hidden sm:inline">Agregar atributo</span>
                     <span className="sm:hidden">Agregar</span>
                   </button>
-                  <div className="absolute right-0 top-full mt-1 w-48 py-1 rounded-lg bg-zinc-800 border border-zinc-700 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-40">
-                    {attributes.filter(a => !modalAttrs[a.id]).map(a => (
-                      <button key={a.id} type="button" onClick={() => modalAddAttr(a)}
-                        className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors">
-                        {a.name}
-                      </button>
-                    ))}
-                  </div>
+                  {attrDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setAttrDropdownOpen(false)} />
+                      <div className="absolute right-0 top-full mt-1 w-48 py-1 rounded-lg bg-zinc-800 border border-zinc-700 shadow-xl z-40">
+                        {attributes.filter(a => !modalAttrs[a.id]).map(a => (
+                          <button key={a.id} type="button" onClick={() => { modalAddAttr(a); setAttrDropdownOpen(false) }}
+                            className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors">
+                            {a.name}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
