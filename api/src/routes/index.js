@@ -1,9 +1,13 @@
 const authMiddleware = require('../middleware/auth')
 const storeStatusMiddleware = require('../middleware/storeStatus')
+const { authLimiter, generalLimiter } = require('../middleware/rateLimiter')
 
 const mountRoutes = (app) => {
-  // Auth (pública)
-  app.use('/api/auth', require('./auth.routes'))
+  // Aplicar rate limiting general a toda la API
+  app.use('/api', generalLimiter)
+
+  // Auth (pública, con rate limiting específico)
+  app.use('/api/auth', authLimiter, require('./auth.routes'))
 
   // Admin (requiere JWT)
   app.use('/api/admin/dashboard', authMiddleware, require('./admin/dashboard.routes'))

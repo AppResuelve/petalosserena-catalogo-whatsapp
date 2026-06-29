@@ -2,13 +2,17 @@ require('dotenv').config()
 
 const express = require('express')
 const cors = require('cors')
+const helmet = require('helmet')
 const morgan = require('morgan')
 const path = require('path')
 const mountRoutes = require('./routes')
 const errorHandler = require('./middleware/errorHandler')
+const timeout = require('./middleware/timeout')
 const { sequelize } = require('./models')
 
 const app = express()
+
+app.set('trust proxy', 1)
 
 const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean)
 
@@ -26,8 +30,10 @@ app.use(cors({
   exposedHeaders: ['X-New-Token'],
 }))
 
+app.use(helmet())
 app.use(morgan('dev'))
-app.use(express.json())
+app.use(express.json({ limit: '1mb' }))
+app.use(timeout)
 
 // API routes
 mountRoutes(app)
