@@ -131,7 +131,7 @@ export default function ProductForm() {
   const [showPriceModal, setShowPriceModal] = useState(false)
   const [priceDefaults, setPriceDefaults] = useState({ retail: true, wholesale: true })
 
-  const { setIsDirty, confirmLeave } = useUnsavedChanges()
+  const { isDirty, setIsDirty, confirmLeave } = useUnsavedChanges()
 
   useEffect(() => {
     api.get('/admin/attributes').then(({ data }) => setAttributes(data)).catch(() => {})

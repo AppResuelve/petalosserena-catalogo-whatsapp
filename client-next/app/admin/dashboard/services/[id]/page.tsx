@@ -116,7 +116,7 @@ export default function ServiceForm() {
   const [attributes, setAttributes] = useState([])
   const [selectedAttributes, setSelectedAttributes] = useState({})
   const [saving, setSaving] = useState(false)
-  const { setIsDirty, confirmLeave } = useUnsavedChanges()
+  const { isDirty, setIsDirty, confirmLeave } = useUnsavedChanges()
   const [loading, setLoading] = useState(isEditing)
   const [slugManual, setSlugManual] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)

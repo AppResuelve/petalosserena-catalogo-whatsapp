@@ -282,20 +282,23 @@ export default function Products() {
   }, [isFilterOpen]);
 
   const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
     setPage(1);
     if (category === "Todos") {
+      setSelectedCategory("Todos");
       setSearchParam({});
     } else {
-      const cat = categories.find((c) => String(c.id) === category);
-      setSearchParam({ cat: cat ? cat.name : category });
+      const cat = categories.find((c) => c.name === category);
+      if (cat) {
+        setSelectedCategory(String(cat.id));
+        setSearchParam({ cat: cat.name });
+      }
     }
   };
 
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("Todos");
-    setSearchParams({});
+    setSearchParam({});
     setPage(1);
   };
 
