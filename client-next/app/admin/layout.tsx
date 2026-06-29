@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { AuthProvider, useAuth } from "@/components/admin/context/AuthContext"
 import { AlertProvider } from "@/components/admin/ui/AlertContext"
 import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext"
+import { siteData } from "@/data/siteData"
 
 const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), { ssr: false })
 
@@ -48,6 +49,14 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    const businessName = siteData?.business?.name || 'Admin'
+    const pageTitle = PAGE_TITLES[pathname]
+      || Object.entries(PAGE_TITLES).find(([key]) => pathname.startsWith(key))?.[1]
+      || 'Admin'
+    document.title = `${pageTitle} — ${businessName}`
+  }, [pathname])
 
   if (loading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center"><p className="text-zinc-400">Cargando...</p></div>
 
