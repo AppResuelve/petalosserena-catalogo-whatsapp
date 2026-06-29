@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense } from "react"
+import { usePathname } from "next/navigation"
 import { StoreProvider, useStore } from "@/context/StoreContext"
 import { CartProvider } from "@/context/CartContext"
 import { Navbar } from "@/components/store/Navbar"
@@ -11,6 +12,8 @@ import { StoreBlocked } from "@/components/store/StoreBlocked"
 
 function StoreInner({ children }: { children: React.ReactNode }) {
   const { store, loading } = useStore()
+  const pathname = usePathname()
+  const isHome = pathname === '/'
   const status = store?.store_status || "active"
 
   if (loading) return null
@@ -21,7 +24,7 @@ function StoreInner({ children }: { children: React.ReactNode }) {
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Suspense fallback={<div className="h-16" />}>
-          <Navbar heroMode={false} />
+          <Navbar heroMode={isHome} />
         </Suspense>
         <main className="flex-1">{children}</main>
         <Footer waveFromColor="#ffffff" />
