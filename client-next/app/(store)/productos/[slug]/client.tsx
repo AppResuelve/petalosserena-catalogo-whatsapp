@@ -141,7 +141,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
                     color: "var(--color-primary)",
                   }}
                 >
-                  {product.category}
+                  {product.category.name}
                 </span>
               </div>
             )}
