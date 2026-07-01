@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Key, Loader, Eye, EyeOff } from 'lucide-react'
+import { Key, Loader, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
 import api from '@/services/admin-api'
+import Link from 'next/link'
 
 export default function Activate() {
   const params = useParams()
@@ -134,6 +135,13 @@ export default function Activate() {
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? 'Activando...' : 'Activar cuenta'}
           </Button>
+
+          <div className="mt-4 text-center">
+            <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              ¿Ya te activaste? Ir al login
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </form>
       </div>
     </div>
