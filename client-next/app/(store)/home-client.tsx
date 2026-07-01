@@ -2,6 +2,7 @@
 'use client'
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   ChevronLeft,
@@ -75,17 +76,7 @@ function PetalDeco({ className = "", style = {} }) {
 /* ─────────────────────────────────────────────────────────────────────────
    HERO VIDEO / CARRUSEL
 ───────────────────────────────────────────────────────────────────────── */
-function HeroMedia() {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    if (HERO_VIDEO_URL) return;
-    const id = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, []);
-
+function HeroMedia({ current }: { current: number }) {
   if (HERO_VIDEO_URL) {
     return (
       <video
@@ -102,19 +93,29 @@ function HeroMedia() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       {HERO_SLIDES.map((slide, i) => (
-        <picture
+        <div
           key={i}
           className="absolute inset-0 transition-opacity duration-1000"
           style={{ opacity: i === current ? 1 : 0 }}
           aria-hidden="true"
         >
-          <source media="(min-width: 768px)" srcSet={slide.desktop} />
-          <img
+          <Image
+            src={slide.desktop}
+            alt=""
+            fill
+            className="hidden md:block object-cover"
+            priority={i === 0}
+            sizes="100vw"
+          />
+          <Image
             src={slide.mobile}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="block md:hidden object-cover"
+            priority={i === 0}
+            sizes="100vw"
           />
-        </picture>
+        </div>
       ))}
     </div>
   );
@@ -205,6 +206,16 @@ export default function HomeClient() {
   const { hero, featuredTitle, featuredSubtitle, cta } = content.home;
   const { productsMap } = useStore();
 
+  const [heroCurrent, setHeroCurrent] = useState(0);
+
+  useEffect(() => {
+    if (HERO_VIDEO_URL) return;
+    const id = setInterval(() => {
+      setHeroCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
   const featuredProducts = useMemo(
     () =>
       Object.values(productsMap)
@@ -217,7 +228,7 @@ export default function HomeClient() {
     <main className="overflow-hidden">
       {/* ══ HERO — video/carrusel fullscreen ══════════════════════════════ */}
       <section className="relative h-screen min-h-[600px] flex items-end overflow-hidden">
-        <HeroMedia />
+        <HeroMedia current={heroCurrent} />
 
         {/* Overlay gradiente: negro en bottom para legibilidad del texto */}
         <div
@@ -329,10 +340,11 @@ export default function HomeClient() {
             {HERO_SLIDES.map((_, i) => (
               <div
                 key={i}
-                className="w-1 h-1 rounded-full transition-all duration-500"
+                className={`rounded-full transition-all duration-500 ${
+                  i === heroCurrent ? 'bg-white w-4 h-1' : 'w-1 h-1'
+                }`}
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.6)",
-                  transform: "scale(1)",
+                  backgroundColor: i === heroCurrent ? '#ffffff' : 'rgba(255,255,255,0.4)',
                 }}
               />
             ))}
