@@ -19,7 +19,7 @@ import { ProductCard } from "@/components/store/ProductCard";
 ───────────────────────────────────────────────────────────────────────── */
 const HERO_VIDEO_URL = null; // ← pon aquí la URL del .mp4 cuando tengas
 const HERO_SLIDES = [
-  { desktop: "/hero/imagen1pc.jpeg", mobile: "/hero/image1mobile.png" },
+  { desktop: "/hero/imagen1pc.jpeg", mobile: "/hero/image1mobile.jpg" },
   { desktop: "/hero/image2pc.jpeg", mobile: "/hero/image2mobile.jpeg" },
   { desktop: "/hero/image3pc.jpeg", mobile: "/hero/imgen3mobile.jpg" },
 ];
