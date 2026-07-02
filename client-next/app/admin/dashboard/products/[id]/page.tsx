@@ -293,6 +293,7 @@ export default function ProductForm() {
       return
     }
     if (Object.keys(modalAttrs).length === 0) {
+      setIsDirty(true)
       setSelectedAttributes({})
       setSkus([])
       setAttrModalOpen(false)
@@ -427,7 +428,7 @@ export default function ProductForm() {
       }
       if (isEditing) await api.put(`/admin/products/${id}`, payload)
       else await api.post('/admin/products', payload)
-      Alert.fire({ message: isEditing ? 'Producto actualizado' : 'Producto creado', type: 'success' })
+      Alert.fire({ message: isEditing ? 'Producto actualizado' : 'Producto creado', type: 'success', duration: 1500 })
       setIsDirty(false)
       router.push('/dashboard/products')
     } catch (err) {
@@ -443,7 +444,7 @@ export default function ProductForm() {
 
   return (
     <div>
-      <button onClick={() => router.push('/dashboard/products')} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
+      <button onClick={async () => { if (await confirmLeave()) router.push('/dashboard/products') }} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /><span className="text-sm">Volver a productos</span>
       </button>
 

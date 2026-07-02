@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Button, Input, Textarea } from '@/components/admin/ui/Form'
 import { Card } from '@/components/admin/ui/Card'
 import { Spinner } from '@/components/admin/ui/Spinner'
+import { useUnsavedChanges } from '@/context/UnsavedChangesContext'
 import ImageUpload from '@/components/admin/ImageUpload'
 import ScheduleInput from '@/components/admin/ScheduleInput'
 import api from '@/services/admin-api'
@@ -27,6 +28,7 @@ const DEFAULT_SETTINGS = {
 
 export default function Settings() {
   const router = useRouter()
+  const { setIsDirty, confirmLeave } = useUnsavedChanges()
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -41,6 +43,7 @@ export default function Settings() {
 
   const handleChange = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
+    setIsDirty(true)
   }
 
   const handleSave = async (e) => {
@@ -49,6 +52,7 @@ export default function Settings() {
     setMessage('')
     try {
       await api.put('/admin/settings', settings)
+      setIsDirty(false)
       setMessage('Configuración guardada')
     } catch (err) {
       setMessage('Error al guardar')
@@ -161,7 +165,7 @@ export default function Settings() {
         </div>
 
         <div className="fixed bottom-0 left-0 right-0 lg:static flex gap-3 justify-end items-center px-4 pb-8 pt-4 lg:p-0 lg:mt-6 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 lg:border-0 lg:bg-transparent z-20">
-          <Button type="button" variant="secondary" onClick={() => router.push('/dashboard')}>Cancelar</Button>
+          <Button type="button" variant="secondary" onClick={async () => { if (await confirmLeave()) router.push('/dashboard') }}>Cancelar</Button>
           <Button type="submit" disabled={saving}>
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </Button>

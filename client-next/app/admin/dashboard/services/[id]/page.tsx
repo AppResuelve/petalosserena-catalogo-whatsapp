@@ -258,6 +258,7 @@ export default function ServiceForm() {
       return
     }
     if (Object.keys(modalAttrs).length === 0) {
+      setIsDirty(true)
       setSelectedAttributes({})
       setVariants([])
       setAttrModalOpen(false)
@@ -355,7 +356,7 @@ export default function ServiceForm() {
       }
       if (isEditing) await api.put(`/admin/services/${id}`, payload)
       else await api.post('/admin/services', payload)
-      Alert.fire({ message: isEditing ? 'Servicio actualizado' : 'Servicio creado', type: 'success' })
+      Alert.fire({ message: isEditing ? 'Servicio actualizado' : 'Servicio creado', type: 'success', duration: 1500 })
       setIsDirty(false)
       router.push('/dashboard/services')
     } catch (err) {
@@ -370,7 +371,7 @@ export default function ServiceForm() {
 
   return (
     <div>
-      <button onClick={() => router.push('/dashboard/services')} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
+      <button onClick={async () => { if (await confirmLeave()) router.push('/dashboard/services') }} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" /><span className="text-sm">Volver a servicios</span>
       </button>
 

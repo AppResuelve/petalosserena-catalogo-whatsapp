@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Button, Input } from "@/components/admin/ui/Form";
 import { Spinner } from "@/components/admin/ui/Spinner";
+import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 import { useAlert } from "@/components/admin/ui/AlertContext";
 import api from "@/services/admin-api";
 
 export default function Attributes() {
   const Alert = useAlert();
+  const { setIsDirty, confirmLeave } = useUnsavedChanges();
   const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,15 +24,16 @@ export default function Attributes() {
 
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditingId("new"); setForm({ name: "", values: [] }); };
+  const openNew = () => { setEditingId("new"); setForm({ name: "", values: [] }); setIsDirty(false) };
   const openEdit = (attr) => {
     setEditingId(attr.id);
+    setIsDirty(false)
     setForm({ name: attr.name || "", values: (attr.values || []).map((v) => ({ id: v.id, value: v.value, sort_order: v.sortOrder || 0 })) });
   };
-  const closeForm = () => setEditingId(null);
-  const handleValueChange = (index, value) => { const next = [...form.values]; next[index] = { ...next[index], value }; setForm({ ...form, values: next }); };
-  const addValue = () => { setForm({ ...form, values: [...form.values, { value: "", sort_order: form.values.length }] }); };
-  const removeValue = (index) => { setForm({ ...form, values: form.values.filter((_, i) => i !== index) }); };
+  const closeForm = async () => { if (await confirmLeave()) setEditingId(null) };
+  const handleValueChange = (index, value) => { const next = [...form.values]; next[index] = { ...next[index], value }; setForm({ ...form, values: next }); setIsDirty(true) };
+  const addValue = () => { setForm({ ...form, values: [...form.values, { value: "", sort_order: form.values.length }] }); setIsDirty(true) };
+  const removeValue = (index) => { setForm({ ...form, values: form.values.filter((_, i) => i !== index) }); setIsDirty(true) };
 
   const handleSave = async () => {
     if (!form.name.trim()) { Alert.fire({ message: "El nombre del atributo es obligatorio", type: "warning" }); return; }
@@ -40,7 +43,7 @@ export default function Attributes() {
       if (editingId === "new") await api.post("/admin/attributes", payload);
       else await api.put(`/admin/attributes/${editingId}`, payload);
       Alert.fire({ message: editingId === "new" ? "Atributo creado" : "Atributo actualizado", type: "success" });
-      closeForm(); load();
+      setIsDirty(false); setEditingId(null); load();
     } catch { Alert.fire({ message: "Error al guardar", type: "error" }); }
     finally { setSaving(false); }
   };
@@ -92,7 +95,7 @@ export default function Attributes() {
           <div className="absolute inset-0 bg-black/60" onClick={closeForm} />
           <div className="relative bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             <h2 className="text-lg font-bold text-zinc-100">{editingId === "new" ? "Nuevo atributo" : "Editar atributo"}</h2>
-            <Input label="Nombre del atributo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Color, Tamaño, Material..." />
+            <Input label="Nombre del atributo" value={form.name} onChange={(e) => { setForm({ ...form, name: e.target.value }); setIsDirty(true) }} placeholder="Color, Tamaño, Material..." />
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-zinc-400">Valores</span>

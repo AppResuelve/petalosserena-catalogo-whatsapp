@@ -32,7 +32,7 @@ export const AlertProvider = ({ children }) => {
           variant,
           duration: config.duration !== undefined
             ? config.duration
-            : variant === 'banner' ? 3000 : null,
+            : variant === 'banner' ? 2000 : null,
           showCancelButton: config.showCancelButton || false,
           confirmButtonText: config.confirmButtonText || config.actionLabel || 'Aceptar',
           cancelButtonText: config.cancelButtonText || 'Cancelar',
