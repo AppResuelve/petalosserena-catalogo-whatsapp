@@ -2,9 +2,11 @@
 'use client'
 import { useState, useRef, useMemo, useEffect } from 'react'
 import * as XLSX from 'xlsx'
-import { Upload, FileSpreadsheet, AlertTriangle, ChevronDown, Download } from 'lucide-react'
+import { FileSpreadsheet, AlertTriangle, ChevronDown, Download } from 'lucide-react'
 import { Button } from './ui/Form'
 import { Modal } from './ui/Modal'
+import { Spinner } from './ui/Spinner'
+import { LoadingOverlay } from './ui/LoadingOverlay'
 import { useAlert } from './ui/AlertContext'
 import api from '@/services/admin-api'
 
@@ -148,6 +150,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [readError, setReadError] = useState('')
   const [createdCount, setCreatedCount] = useState(0)
+  const [createdAttributes, setCreatedAttributes] = useState([])
   const [warnings, setWarnings] = useState([])
   const [previewPage, setPreviewPage] = useState(1)
 
@@ -157,6 +160,22 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     if (!rawData || !nameCol || !priceCol) return { products: [], errors: [] }
     return parseProducts(rawData, nameCol, priceCol, optionals, attrPairs)
   }, [rawData, nameCol, priceCol, optionals, attrPairs])
+
+  const detectedAttributes = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    parsed.forEach((p) => {
+      (p.skus || []).forEach((sku) => {
+        sku.attrValues.forEach(({ attrName, value }) => {
+          if (!map.has(attrName)) map.set(attrName, new Set())
+          map.get(attrName)!.add(value)
+        })
+      })
+    })
+    return Array.from(map.entries()).map(([name, values]) => ({
+      name,
+      values: Array.from(values),
+    }))
+  }, [parsed])
 
   useEffect(() => {
     setPreviewPage(1)
@@ -234,21 +253,6 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
 
     if (final.length === 0) return
 
-    // Alert for new attributes
-    if (attrPairs.length > 0) {
-      const attrNames = [...new Set(final.flatMap(p =>
-        (p.skus || []).flatMap(s => s.attrValues.map(av => av.attrName))
-      ))]
-      if (attrNames.length > 0) {
-        await Alert.fire({
-          message: `Se crearán ${attrNames.length} atributo(s): ${attrNames.join(', ')}`,
-          type: 'info',
-          variant: 'banner',
-          duration: 4000,
-        })
-      }
-    }
-
     setStep('creating')
 
     const payload = final.map(p => {
@@ -264,20 +268,13 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
       })
 
       setCreatedCount(data.created)
+      setCreatedAttributes(data.createdAttributes || [])
       setWarnings(data.warnings || [])
 
-      if (data.warnings?.length > 0) {
-        Alert.fire({
-          message: `${data.created} productos creados. ${data.warnings.length} slugs fueron modificados.`,
-          type: 'warning',
-          duration: 6000,
-        })
-      } else {
-        Alert.fire({
-          message: `${data.created} productos creados`,
-          type: 'success',
-        })
-      }
+      Alert.fire({
+        message: `${data.created} productos creados${data.createdAttributes?.length ? `. ${data.createdAttributes.length} atributo(s) nuevo(s): ${data.createdAttributes.join(', ')}` : ''}`,
+        type: 'success',
+      })
 
       onCreated?.()
       setStep('results')
@@ -306,6 +303,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     setFileName('')
     setCategoryId('')
     setWarnings([])
+    setCreatedAttributes([])
     setCreatedCount(0)
     onClose()
   }
@@ -320,6 +318,7 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
     setReadError('')
     setFileName('')
     setWarnings([])
+    setCreatedAttributes([])
     setCreatedCount(0)
     setStep('upload')
   }
@@ -328,7 +327,8 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
   const hasExtraCols = extraCols.length > 0
 
   return (
-    <Modal open={open} onClose={handleClose} title="Creación masiva">
+    <>
+    <Modal open={open} onClose={handleClose} title="Creación masiva" closable={step !== 'creating'}>
       {/* Step 1: Upload */}
       {step === 'upload' && (
         <div className="space-y-4">
@@ -467,6 +467,24 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
             </div>
           )}
 
+          {/* Detected attributes */}
+          {detectedAttributes.length > 0 && (
+            <div className="px-4 py-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-sm">
+              <p className="font-medium text-cyan-400 mb-2">
+                Atributos detectados en el archivo:
+              </p>
+              {detectedAttributes.map(({ name, values }) => (
+                <p key={name} className="text-cyan-300/80 leading-relaxed">
+                  • <span className="text-cyan-400 font-medium">{name}</span>:
+                  {' '}{values.length} valor{values.length !== 1 ? 'es' : ''} — {values.join(', ')}
+                </p>
+              ))}
+              <p className="mt-2 text-cyan-500/60 text-xs">
+                Estos atributos y sus valores se crearán automáticamente al confirmar.
+              </p>
+            </div>
+          )}
+
           {/* Errors */}
           {errors.length > 0 && (
             <div className="px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm space-y-1">
@@ -553,11 +571,12 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
         </div>
       )}
 
-      {/* Creating */}
+      {/* Creating — overlay handles the UI */}
       {step === 'creating' && (
         <div className="text-center py-8">
-          <Upload className="w-8 h-8 text-cyan-400 mx-auto mb-3 animate-pulse" />
-          <p className="text-zinc-300 font-medium">Creando productos...</p>
+          <Spinner size="lg" />
+          <p className="text-zinc-300 font-medium mt-4">Creando {parsed.length} productos...</p>
+          <p className="text-zinc-500 text-sm mt-1">No cierres esta ventana.</p>
         </div>
       )}
 
@@ -566,7 +585,12 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
         <div className="space-y-4">
           <div className="text-center">
             <p className="text-emerald-400 font-medium text-lg">{createdCount} productos creados</p>
-            {warnings.length === 0 && (
+            {createdAttributes.length > 0 && (
+              <p className="text-sm text-cyan-400 mt-1">
+                + {createdAttributes.length} atributo{createdAttributes.length !== 1 ? 's' : ''} nuevo{createdAttributes.length !== 1 ? 's' : ''}: {createdAttributes.join(', ')}
+              </p>
+            )}
+            {warnings.length === 0 && createdAttributes.length === 0 && (
               <p className="text-sm text-zinc-500 mt-1">Sin conflictos de slugs</p>
             )}
           </div>
@@ -607,5 +631,11 @@ export default function BulkProductModal({ open, onClose, categories, onCreated 
         </div>
       )}
     </Modal>
+    <LoadingOverlay
+      open={step === 'creating'}
+      message={`Creando ${parsed.length} productos...`}
+      description="No cierres esta ventana."
+    />
+    </>
   )
 }

@@ -315,13 +315,14 @@ const bulkCreate = async (products, categoryId) => {
       }
       await t.commit()
     } catch (err) { await t.rollback(); throw err }
-    return { created: rows.length, warnings }
+    return { created: rows.length, warnings, createdAttributes: [] }
   }
 
   // Slow path: productos con variantes, create individual + findOrCreate attributes
   const existingSlugs = new Set((await Product.findAll({ attributes: ["slug"] })).map((p) => p.slug))
   const used = new Set([...existingSlugs])
   const warnings = []
+  const createdAttributes = []
   let createdCount = 0
 
   const t = await sequelize.transaction()
@@ -359,11 +360,14 @@ const bulkCreate = async (products, categoryId) => {
           const attributeValueIds = []
           if (sku.attrValues?.length > 0) {
             for (const { attrName, value } of sku.attrValues) {
-              const [attr] = await Attribute.findOrCreate({
+              const [attr, attrCreated] = await Attribute.findOrCreate({
                 where: { name: { [require('sequelize').Op.iLike]: attrName } },
                 defaults: { name: attrName, sortOrder: 0 },
                 transaction: t,
               })
+              if (attrCreated && !createdAttributes.includes(attr.name)) {
+                createdAttributes.push(attr.name)
+              }
               const [attrValue] = await AttributeValue.findOrCreate({
                 where: { attributeId: attr.id, value: { [require('sequelize').Op.iLike]: value } },
                 defaults: { attributeId: attr.id, value, sortOrder: 0 },
@@ -401,7 +405,7 @@ const bulkCreate = async (products, categoryId) => {
     await t.commit()
   } catch (err) { await t.rollback(); throw err }
 
-  return { created: createdCount, warnings }
+  return { created: createdCount, warnings, createdAttributes }
 };
 
 module.exports = { list, getById, create, update, remove, bulkCreate };
