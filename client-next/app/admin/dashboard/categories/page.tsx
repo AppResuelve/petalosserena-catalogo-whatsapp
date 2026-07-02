@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react'
 import { Button, Input } from '@/components/admin/ui/Form'
 import { Modal } from '@/components/admin/ui/Modal'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import { useCategories } from '@/hooks/admin-useCategories'
 import api from '@/services/admin-api'
 import { useAlert } from '@/components/admin/ui/AlertContext'
@@ -147,10 +148,15 @@ export default function Categories() {
         </Button>
       </div>
 
+      <div className="relative min-h-[200px]">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Spinner />
+          </div>
+        )}
+
       <div className="space-y-2">
-        {loading ? (
-          <p className="text-zinc-500">Cargando...</p>
-        ) : ordered.length === 0 ? (
+        {ordered.length === 0 ? (
           <p className="text-zinc-500">No hay categorías</p>
         ) : (
           ordered.map((cat, i) => (
@@ -178,6 +184,7 @@ export default function Categories() {
             </div>
           ))
         )}
+      </div>
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar categoría' : 'Nueva categoría'}>

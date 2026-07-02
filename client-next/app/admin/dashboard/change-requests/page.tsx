@@ -7,6 +7,7 @@ import { Card } from '@/components/admin/ui/Card'
 import { Modal } from '@/components/admin/ui/Modal'
 import { useAlert } from '@/components/admin/ui/AlertContext'
 import { useChangeRequests, useChangeRequestsRemaining, useModules } from '@/hooks/admin-useChangeRequests'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import api from '@/services/admin-api'
 
 const STATUS_MAP = {
@@ -299,11 +300,13 @@ export default function ChangeRequests() {
             />
           </div>
 
-          {modulesLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader className="w-6 h-6 animate-spin text-cyan-400" />
-            </div>
-          ) : filteredCategories.length === 0 ? (
+          <div className="relative min-h-[200px]">
+            {modulesLoading && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <Spinner />
+              </div>
+            )}
+          {modulesLoading ? null : filteredCategories.length === 0 ? (
             <Card>
               <div className="text-center py-12">
                 {search.trim() ? (
@@ -393,17 +396,20 @@ export default function ChangeRequests() {
               </div>
             ))
           )}
+          </div>
         </div>
       )}
 
       {/* History table */}
       {showHistory && (
         <>
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader className="w-6 h-6 animate-spin text-cyan-400" />
+        <div className="relative min-h-[200px]">
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <Spinner />
             </div>
-          ) : requests.length === 0 ? (
+          )}
+          {loading ? null : requests.length === 0 ? (
             <Card>
               <div className="text-center py-12">
                 <Clock className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
@@ -451,6 +457,7 @@ export default function ChangeRequests() {
               </div>
             </Card>
           )}
+          </div>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4">

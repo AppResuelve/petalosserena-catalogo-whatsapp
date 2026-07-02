@@ -1,8 +1,9 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, Loader, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Button, Input } from "@/components/admin/ui/Form";
+import { Spinner } from "@/components/admin/ui/Spinner";
 import { useAlert } from "@/components/admin/ui/AlertContext";
 import api from "@/services/admin-api";
 
@@ -51,7 +52,7 @@ export default function Attributes() {
     catch { Alert.fire({ message: "Error al eliminar", type: "error" }); }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader className="w-6 h-6 animate-spin text-cyan-400" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-32"><Spinner /></div>;
 
   return (
     <div className="max-w-7xl mx-auto">

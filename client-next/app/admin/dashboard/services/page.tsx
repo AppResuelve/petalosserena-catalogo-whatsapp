@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Plus, Search, Edit, Trash2, Loader } from 'lucide-react'
+import { Plus, Search, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
 import { Table } from '@/components/admin/ui/Table'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
 import { formatPrice } from '@/components/admin/lib/utils'
@@ -101,7 +102,7 @@ export default function Services() {
               : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
             } disabled:opacity-50`}
         >
-          {toggling === s.id ? <Loader className="w-3 h-3 animate-spin" /> : <span className={`w-2 h-2 rounded-full ${s.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />}
+          {toggling === s.id ? <Spinner size="sm" /> : <span className={`w-2 h-2 rounded-full ${s.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />}
           {s.status === 'active' ? 'Activo' : 'Borrador'}
         </button>
       ),
@@ -150,12 +151,19 @@ export default function Services() {
         </div>
       </div>
 
+      <div className="relative min-h-[200px]">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-zinc-950/50">
+            <Spinner />
+          </div>
+        )}
       <Table
         columns={columns}
         data={services}
         onRowClick={(s) => router.push(`/dashboard/services/${s.id}`)}
-        emptyMessage={loading ? 'Cargando...' : 'No hay servicios'}
+        emptyMessage="No hay servicios"
       />
+      </div>
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">

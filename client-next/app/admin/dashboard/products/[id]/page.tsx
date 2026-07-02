@@ -3,11 +3,12 @@
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader, Image, Trash2, Plus } from 'lucide-react'
+import { ArrowLeft, Image, Trash2, Plus } from 'lucide-react'
 import { Button, Input, Textarea, Select } from '@/components/admin/ui/Form'
 import { Checkbox } from '@/components/admin/ui/Checkbox'
 import ImageUpload from '@/components/admin/ImageUpload'
 import GalleryPicker from '@/components/admin/GalleryPicker'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import { useProduct } from '@/hooks/admin-useProducts'
 import { useCategories } from '@/hooks/admin-useCategories'
 import api from '@/services/admin-api'
@@ -435,7 +436,7 @@ export default function ProductForm() {
   }
 
   if (productLoading && isEditing) {
-    return <div className="flex items-center justify-center py-20"><Loader className="w-6 h-6 animate-spin text-cyan-400" /></div>
+    return <div className="flex items-center justify-center py-32"><Spinner /></div>
   }
 
   const availableAttrs = attributes.filter(a => !selectedAttributes[a.id])

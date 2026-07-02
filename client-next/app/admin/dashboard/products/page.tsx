@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Plus, Search, Edit, Trash2, FileSpreadsheet, Loader, MoreHorizontal } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, FileSpreadsheet, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
 import { Table } from '@/components/admin/ui/Table'
 import { Modal } from '@/components/admin/ui/Modal'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import BulkProductModal from '@/components/admin/BulkProductModal'
 import { useProducts } from '@/hooks/admin-useProducts'
 import { useCategories } from '@/hooks/admin-useCategories'
@@ -147,7 +148,7 @@ export default function Products() {
             } disabled:opacity-50`}
         >
           {toggling === p.id ? (
-            <Loader className="w-3 h-3 animate-spin" />
+            <Spinner size="sm" />
           ) : (
             <span className={`w-2 h-2 rounded-full ${p.status === 'active' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
           )}
@@ -266,15 +267,23 @@ export default function Products() {
         </div>
       </div>
 
+      <div className="relative min-h-[200px]">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-zinc-950/50">
+            <Spinner />
+          </div>
+        )}
       <Table
         columns={columns}
         data={products}
         onRowClick={(p) => router.push(`/dashboard/products/${p.id}`)}
-        emptyMessage={loading ? 'Cargando...' : 'No hay productos'}
+        emptyMessage="No hay productos"
         selectable
         selected={selected}
         onSelectionChange={setSelected}
       />
+
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

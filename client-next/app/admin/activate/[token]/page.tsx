@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Key, Loader, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Key, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import api from '@/services/admin-api'
 import Link from 'next/link'
 
@@ -61,7 +62,7 @@ export default function Activate() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-        <Loader className="w-6 h-6 animate-spin text-cyan-400" />
+        <Spinner />
       </div>
     )
   }

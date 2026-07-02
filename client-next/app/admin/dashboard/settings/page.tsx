@@ -4,9 +4,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from "next/navigation"
-import { Loader } from 'lucide-react'
 import { Button, Input, Textarea } from '@/components/admin/ui/Form'
 import { Card } from '@/components/admin/ui/Card'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import ImageUpload from '@/components/admin/ImageUpload'
 import ScheduleInput from '@/components/admin/ScheduleInput'
 import api from '@/services/admin-api'
@@ -59,8 +59,8 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader className="w-6 h-6 animate-spin text-cyan-400" />
+      <div className="flex items-center justify-center py-32">
+        <Spinner />
       </div>
     )
   }

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Eye, EyeOff, PieChart } from 'lucide-react'
 import { useAuth } from '@/components/admin/context/AuthContext'
 import { Button } from '@/components/admin/ui/Form'
+import { Spinner } from '@/components/admin/ui/Spinner'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -79,7 +80,7 @@ export default function Login() {
             </div>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {loading ? <><Spinner size="sm" className="mr-2" /> Ingresando...</> : 'Ingresar'}
           </Button>
         </form>
 

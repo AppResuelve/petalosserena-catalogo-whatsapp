@@ -9,6 +9,8 @@ import { AuthProvider, useAuth } from "@/components/admin/context/AuthContext"
 import { AlertProvider } from "@/components/admin/ui/AlertContext"
 import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext"
 import { siteData } from "@/data/siteData"
+import { Spinner } from "@/components/admin/ui/Spinner"
+import { Skeleton } from "@/components/admin/ui/Skeleton"
 
 const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), { ssr: false })
 
@@ -58,7 +60,14 @@ function AdminShell({ children }: { children: React.ReactNode }) {
     document.title = `${pageTitle} — ${businessName}`
   }, [pathname])
 
-  if (loading) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center"><p className="text-zinc-400">Cargando...</p></div>
+  if (loading) return (
+    <div className="min-h-screen bg-zinc-950 flex">
+      <Skeleton className="w-64 h-screen rounded-none hidden lg:block" />
+      <div className="flex-1 flex items-center justify-center">
+        <Spinner />
+      </div>
+    </div>
+  )
 
   if (!user && !isPublic) return null
 

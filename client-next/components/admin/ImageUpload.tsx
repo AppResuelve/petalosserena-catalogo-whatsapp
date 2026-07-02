@@ -1,8 +1,9 @@
 // @ts-nocheck
 "use client";
 import { useState, useRef } from "react";
-import { Upload, X, Loader } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { uploadImage } from "@/services/admin-api";
+import { Spinner } from "./ui/Spinner";
 import { useAlert } from "./ui/AlertContext";
 
 export default function ImageUpload({
@@ -96,7 +97,7 @@ export default function ImageUpload({
             className="aspect-square rounded-lg border-2 border-dashed border-zinc-700 hover:border-cyan-500 flex flex-col items-center justify-center gap-1 text-zinc-500 hover:text-cyan-400 transition-colors bg-zinc-800/50"
           >
             {uploading ? (
-              <Loader className="w-5 h-5 animate-spin" />
+              <Spinner size="sm" />
             ) : (
               <>
                 <Upload className="w-5 h-5" />

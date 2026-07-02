@@ -1,8 +1,9 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect, useMemo } from 'react'
-import { Image, Loader } from 'lucide-react'
+import { Image } from 'lucide-react'
 import { Modal } from './ui/Modal'
+import { Spinner } from './ui/Spinner'
 import api from '@/services/admin-api'
 
 const TABS = [
@@ -56,7 +57,7 @@ export default function GalleryPicker({ open, onClose, onSelect, max = 4, curren
     <Modal open={open} onClose={onClose} title="Galería">
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader className="w-6 h-6 animate-spin text-cyan-400" />
+          <Spinner />
         </div>
       ) : (
         <>
@@ -103,7 +104,7 @@ export default function GalleryPicker({ open, onClose, onSelect, max = 4, curren
                     <img src={item.url} alt={item.filename} className="w-full h-full object-cover" />
                     {moving === item.id && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Loader className="w-5 h-5 animate-spin text-cyan-400" />
+                        <Spinner size="sm" />
                       </div>
                     )}
                     <p className="absolute bottom-0 left-0 right-0 px-1.5 py-1 text-[10px] text-zinc-300 bg-black/60 truncate">

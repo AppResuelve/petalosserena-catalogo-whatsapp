@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 import { Button, Input, Textarea, Select } from '@/components/admin/ui/Form'
 import ImageUpload from '@/components/admin/ImageUpload'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
 import { useUnsavedChanges } from '@/context/UnsavedChangesContext'
@@ -364,7 +365,7 @@ export default function ServiceForm() {
     } finally { setSaving(false) }
   }
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader className="w-6 h-6 animate-spin text-cyan-400" /></div>
+  if (loading) return <div className="flex items-center justify-center py-32"><Spinner /></div>
   const availableAttrs = attributes.filter(a => !selectedAttributes[a.id])
 
   return (

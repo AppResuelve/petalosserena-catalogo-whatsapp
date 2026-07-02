@@ -1,9 +1,10 @@
 // @ts-nocheck
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Upload, Trash2, Copy, Check, Loader, RotateCcw } from 'lucide-react'
+import { Upload, Trash2, Copy, Check, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
 import { Card } from '@/components/admin/ui/Card'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import { uploadImage } from '@/services/admin-api'
 import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
@@ -266,11 +267,13 @@ export default function Media() {
       </div>
 
       {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader className="w-6 h-6 animate-spin text-cyan-400" />
-        </div>
-      ) : filtered.length === 0 ? (
+      <div className="relative min-h-[200px]">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Spinner />
+          </div>
+        )}
+      {filtered.length === 0 ? (
         <Card>
           <div className="text-center py-12">
             {isTrash ? (
@@ -388,6 +391,7 @@ export default function Media() {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }

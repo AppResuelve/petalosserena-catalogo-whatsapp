@@ -2,6 +2,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { ExternalLink, Globe, AlertTriangle, Pencil } from 'lucide-react'
+import { Spinner } from '@/components/admin/ui/Spinner'
 import api from '@/services/admin-api'
 
 const STORE_STATUS = [
@@ -130,6 +131,7 @@ export default function Store() {
             ))}
           </select>
           <span className={`w-2 h-2 rounded-full ${current.dot}`} />
+          {saving && <Spinner size="sm" />}
         </div>
         <span className="text-sm text-zinc-500">
           {status === 'active' && 'Tu tienda está visible para todo el mundo'}
