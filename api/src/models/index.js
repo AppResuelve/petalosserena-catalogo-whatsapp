@@ -15,6 +15,8 @@ const models = {
   SkuAttributeValue: require('./SkuAttributeValue')(sequelize, require('sequelize').DataTypes),
   ServiceVariant: require('./ServiceVariant')(sequelize, require('sequelize').DataTypes),
   ServiceVariantModifier: require('./ServiceVariantModifier')(sequelize, require('sequelize').DataTypes),
+  Tag: require('./Tag')(sequelize, require('sequelize').DataTypes),
+  TagValue: require('./TagValue')(sequelize, require('sequelize').DataTypes),
 }
 
 Object.keys(models).forEach((modelName) => {

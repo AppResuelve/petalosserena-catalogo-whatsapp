@@ -19,6 +19,7 @@ const mountRoutes = (app) => {
   app.use('/api/admin/change-requests', authMiddleware, require('./admin/changeRequests.routes'))
   app.use('/api/admin/services', authMiddleware, require('./admin/services.routes'))
   app.use('/api/admin/attributes', authMiddleware, require('./admin/attributes.routes'))
+  app.use('/api/admin/tags', authMiddleware, require('./admin/tags.routes'))
 
   // Internal (requiere APPRESUELVE_SECRET — solo para la platform)
   app.use('/api/internal', require('./internal.routes'))
@@ -29,6 +30,7 @@ const mountRoutes = (app) => {
   app.use('/api/store/settings', require('./store/settings.routes'))
   app.use('/api/store/orders', storeStatusMiddleware, require('./store/orders.routes'))
   app.use('/api/store/services', storeStatusMiddleware, require('./store/services.routes'))
+  app.use('/api/store/tags', storeStatusMiddleware, require('./store/tags.routes'))
 }
 
 module.exports = mountRoutes
