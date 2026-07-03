@@ -40,7 +40,10 @@ export function useProduct(id) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!id || id === 'new') {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     api.get(`/admin/products/${id}`)
       .then(({ data }) => setProduct(data))

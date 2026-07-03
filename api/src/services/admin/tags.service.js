@@ -68,7 +68,7 @@ const create = async (data) => {
   return Tag.findByPk(tag.id, { include: [includeValues] })
 }
 
-const update = async (id, data) => {
+const update = async (id, data, force) => {
   const tag = await Tag.findByPk(id)
   if (!tag) throw Object.assign(new Error('Etiqueta no encontrada'), { status: 404 })
   await tag.update({ name: data.name, color: data.color, sortOrder: data.sortOrder || 0 })
@@ -88,7 +88,7 @@ const update = async (id, data) => {
     }
     const allValueIds = (await TagValue.findAll({ where: { tagId: id }, attributes: ['id'] })).map(v => v.id)
     const removedIds = allValueIds.filter(rid => !keepIds.includes(rid))
-    if (removedIds.length > 0) {
+    if (removedIds.length > 0 && !force) {
       const conflict = await buildConflictResponse(removedIds, 'TAG_VALUES_IN_USE', tag.name)
       if (conflict) return { tag: null, conflict }
     }

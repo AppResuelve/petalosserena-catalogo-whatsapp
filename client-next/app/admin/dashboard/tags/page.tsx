@@ -17,14 +17,17 @@ export default function TagsPage() {
   const [saving, setSaving] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({ name: '', color: '#6366f1', values: [] })
+  const [originalForm, setOriginalForm] = useState(null)
 
-  const openNew = () => { setEditingId('new'); setForm({ name: '', color: '#6366f1', values: [] }); setIsDirty(false) }
+  const openNew = () => { setEditingId('new'); setForm({ name: '', color: '#6366f1', values: [] }); setOriginalForm(null); setIsDirty(false) }
   const openEdit = (tag) => {
+    const snapshot = { name: tag.name, color: tag.color, values: (tag.values || []).map(v => ({ id: v.id, value: v.value, sortOrder: v.sortOrder || 0 })) }
     setEditingId(tag.id)
-    setForm({ name: tag.name, color: tag.color, values: (tag.values || []).map(v => ({ id: v.id, value: v.value, sortOrder: v.sortOrder || 0 })) })
+    setForm(snapshot)
+    setOriginalForm(snapshot)
     setIsDirty(false)
   }
-  const closeForm = async () => { if (await confirmLeave()) setEditingId(null) }
+  const closeForm = async () => { if (await confirmLeave()) { setEditingId(null); setOriginalForm(null) } }
 
   const addValue = () => { setForm({ ...form, values: [...form.values, { value: '', sortOrder: form.values.length }] }); setIsDirty(true) }
   const removeValue = (i) => { setForm({ ...form, values: form.values.filter((_, idx) => idx !== i) }); setIsDirty(true) }
@@ -83,6 +86,8 @@ export default function TagsPage() {
             if (result.isConfirmed) {
               await api.put(`/admin/tags/${editingId}?force=true`, payload)
             } else {
+              if (originalForm) setForm(originalForm)
+              setIsDirty(false)
               setSaving(false)
               return
             }
@@ -92,7 +97,7 @@ export default function TagsPage() {
         }
       }
       Alert.fire({ message: editingId === 'new' ? 'Etiqueta creada' : 'Etiqueta actualizada', type: 'success', duration: 1500 })
-      setIsDirty(false); setEditingId(null); refetch()
+      setIsDirty(false); setEditingId(null); setOriginalForm(null); refetch()
     } catch { Alert.fire({ message: 'Error al guardar', type: 'error' }) }
     finally { setSaving(false) }
   }

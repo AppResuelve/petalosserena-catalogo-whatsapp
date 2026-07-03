@@ -16,7 +16,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const result = await tagsService.update(req.params.id, req.body)
+    const result = await tagsService.update(req.params.id, req.body, req.query.force === 'true')
     if (result?.conflict) {
       return res.status(409).json(result.conflict)
     }

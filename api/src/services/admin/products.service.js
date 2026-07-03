@@ -68,7 +68,11 @@ const list = async (query = {}) => {
 };
 
 const getById = async (id) => {
-  const product = await Product.findByPk(id, {
+  const numericId = Number(id)
+  if (!Number.isInteger(numericId) || numericId <= 0) {
+    throw Object.assign(new Error("ID de producto inválido"), { status: 400 });
+  }
+  const product = await Product.findByPk(numericId, {
     include: [
       { model: Category, as: "category", attributes: ["id", "name", "slug"] },
       skuInclude,
