@@ -4,6 +4,8 @@ const {
   ProductSku,
   AttributeValue,
   Attribute,
+  TagValue,
+  Tag,
   sequelize,
 } = require("../../models");
 
@@ -25,7 +27,7 @@ const skuInclude = {
 };
 
 const list = async (query = {}) => {
-  const { page = 1, limit = 20, search, categoryId, status } = query;
+  const { page = 1, limit = 20, search, categoryId, status, tagId } = query;
   const offset = (page - 1) * limit;
 
   const where = {};
@@ -38,12 +40,19 @@ const list = async (query = {}) => {
   if (categoryId) where.categoryId = categoryId;
   if (status) where.status = status;
 
+  const include = [
+    { model: Category, as: "category", attributes: ["id", "name", "slug"] },
+    skuInclude,
+    { model: TagValue, as: "tagValues", include: [{ model: Tag, as: "tag" }] },
+  ];
+
+  if (tagId) {
+    include[2].where = { id: Number(tagId) };
+  }
+
   const { count, rows } = await Product.findAndCountAll({
     where,
-    include: [
-      { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-      skuInclude,
-    ],
+    include,
     distinct: true,
     order: [["name", "ASC"]],
     limit: Number(limit),
@@ -63,6 +72,7 @@ const getById = async (id) => {
     include: [
       { model: Category, as: "category", attributes: ["id", "name", "slug"] },
       skuInclude,
+      { model: TagValue, as: "tagValues", include: [{ model: Tag, as: "tag" }] },
     ],
   });
   if (!product) {
@@ -147,10 +157,13 @@ const create = async (data) => {
   data.comparePrice = comparePrice;
   data.discountPercentage = discountPercentage;
 
-  const { skus, ...productData } = data;
+  const { skus, tagIds, ...productData } = data;
 
   const result = await sequelize.transaction(async (t) => {
     const product = await Product.create(productData, { transaction: t });
+    if (tagIds && tagIds.length > 0) {
+      await product.setTagValues(tagIds, { transaction: t });
+    }
     if (skus && skus.length > 0) {
       const basePrices = { retailPrice: product.retailPrice, wholesalePrice: product.wholesalePrice, wholesaleMinQty: product.wholesaleMinQty }
       await syncSkus(product.id, skus, basePrices, t);
@@ -218,10 +231,13 @@ const update = async (id, data) => {
   data.comparePrice = comparePrice;
   data.discountPercentage = discountPercentage;
 
-  const { skus, ...productData } = data;
+  const { skus, tagIds, ...productData } = data;
 
   const result = await sequelize.transaction(async (t) => {
     await product.update(productData, { transaction: t });
+    if (tagIds !== undefined) {
+      await product.setTagValues(tagIds, { transaction: t });
+    }
     if (skus && Array.isArray(skus)) {
       const basePrices = { retailPrice: product.retailPrice, wholesalePrice: product.wholesalePrice, wholesaleMinQty: product.wholesaleMinQty }
       await syncSkus(product.id, skus, basePrices, t);

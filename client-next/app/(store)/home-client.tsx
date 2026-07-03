@@ -105,7 +105,7 @@ function HeroMedia({ current }: { current: number }) {
             fill
             className="hidden md:block object-cover"
             priority={i === 0}
-            sizes="100vw"
+            sizes="(min-width: 768px) 100vw"
           />
           <Image
             src={slide.mobile}
@@ -113,7 +113,7 @@ function HeroMedia({ current }: { current: number }) {
             fill
             className="block md:hidden object-cover"
             priority={i === 0}
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw"
           />
         </div>
       ))}

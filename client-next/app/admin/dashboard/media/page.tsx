@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Upload, Trash2, Copy, Check, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
+import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import { Card } from '@/components/admin/ui/Card'
 import { Spinner } from '@/components/admin/ui/Spinner'
 import { uploadImage } from '@/services/admin-api'
@@ -218,15 +219,12 @@ export default function Media() {
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <select
+            <DropdownSelect
+              options={UPLOAD_FOLDERS.map(f => ({ value: f, label: folderLabel(f) }))}
               value={uploadFolder}
-              onChange={(e) => setUploadFolder(e.target.value)}
-              className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-cyan-500"
-            >
-              {UPLOAD_FOLDERS.map((f) => (
-                <option key={f} value={f}>{folderLabel(f)}</option>
-              ))}
-            </select>
+              onChange={(v) => setUploadFolder(v as string)}
+              className="w-40"
+            />
             <input
               ref={fileInputRef}
               type="file"

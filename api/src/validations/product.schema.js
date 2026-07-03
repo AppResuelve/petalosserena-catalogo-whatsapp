@@ -12,6 +12,7 @@ const productSchema = z.object({
   wholesaleMinQty: z.coerce.number().int().nullable().optional(),
   status: z.enum(['active', 'draft']).optional(),
   tags: z.array(z.string()).optional(),
+  tagIds: z.array(z.number()).optional(),
   categoryId: z.coerce.number().nullable().optional(),
   skus: z.array(z.object({
     id: z.coerce.number().int().optional(),

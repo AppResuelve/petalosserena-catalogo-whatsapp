@@ -5,12 +5,14 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus, Search, Edit, Trash2, FileSpreadsheet, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/admin/ui/Form'
+import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import { Table } from '@/components/admin/ui/Table'
 import { Modal } from '@/components/admin/ui/Modal'
 import { Spinner } from '@/components/admin/ui/Spinner'
 import BulkProductModal from '@/components/admin/BulkProductModal'
 import { useProducts } from '@/hooks/admin-useProducts'
 import { useCategories } from '@/hooks/admin-useCategories'
+import { useTags } from '@/hooks/admin-useTags'
 import { useAlert } from '@/components/admin/ui/AlertContext'
 import api from '@/services/admin-api'
 import { formatPrice } from '@/components/admin/lib/utils'
@@ -20,6 +22,7 @@ export default function Products() {
   const Alert = useAlert()
   const [search, setSearch] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [tagId, setTagId] = useState('')
   const [page, setPage] = useState(1)
   const [bulkOpen, setBulkOpen] = useState(false)
   const [toggling, setToggling] = useState(null)
@@ -28,9 +31,10 @@ export default function Products() {
   const [moreOpen, setMoreOpen] = useState(false)
   const [newMenuOpen, setNewMenuOpen] = useState(false)
 
-  const params = { page, limit: 20, search, ...(categoryId && { categoryId }) }
+  const params = { page, limit: 20, search, ...(categoryId && { categoryId }), ...(tagId && { tagId }) }
   const { products, total, totalPages, loading, refetch, updateProduct } = useProducts(params)
   const { categories } = useCategories()
+  const { tags } = useTags()
 
   const handleToggleStatus = async (e, product) => {
     e.stopPropagation()
@@ -134,6 +138,24 @@ export default function Products() {
       ),
     },
     { header: 'Categoría', accessor: (p) => p.category?.name || '—' },
+    {
+      header: 'Etiquetas',
+      className: 'max-w-[180px]',
+      accessor: (p) => {
+        const tv = p.tagValues || []
+        if (tv.length === 0) return <span className="text-zinc-600">—</span>
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tv.slice(0, 3).map(tv => (
+              <span key={tv.id} className="text-xs px-1.5 py-0.5 rounded-full text-zinc-300" style={{ backgroundColor: (tv.tag?.color || '#6366f1') + '30', color: tv.tag?.color || '#a5b4fc' }}>
+                {tv.value}
+              </span>
+            ))}
+            {tv.length > 3 && <span className="text-xs text-zinc-500">+{tv.length - 3}</span>}
+          </div>
+        )
+      },
+    },
     { header: 'Precio', accessor: (p) => formatPrice(p.retailPrice) },
     {
       header: 'Estado',
@@ -223,16 +245,18 @@ export default function Products() {
             className="w-full pl-9 pr-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
           />
         </div>
-        <select
+        <DropdownSelect
+          options={[{ value: '', label: 'Todas las categorías' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
           value={categoryId}
-          onChange={(e) => { setCategoryId(e.target.value); setPage(1) }}
-          className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-200 text-sm focus:outline-none focus:border-cyan-500"
-        >
-          <option value="">Todas las categorías</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+          onChange={(v) => { setCategoryId(v); setPage(1) }}
+          className="w-48"
+        />
+        <DropdownSelect
+          options={[{ value: '', label: 'Todas las etiquetas' }, ...tags.flatMap(t => t.values.map(v => ({ value: v.id, label: `${t.name}: ${v.value}` })))]}
+          value={tagId}
+          onChange={(v) => { setTagId(v); setPage(1) }}
+          className="w-48"
+        />
       </div>
 
       {/* Bulk actions */}

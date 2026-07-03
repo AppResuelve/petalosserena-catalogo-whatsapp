@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Image, Trash2, Plus } from 'lucide-react'
-import { Button, Input, Textarea, Select } from '@/components/admin/ui/Form'
+import { Button, Input, Textarea } from '@/components/admin/ui/Form'
+import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import { Checkbox } from '@/components/admin/ui/Checkbox'
 import ImageUpload from '@/components/admin/ImageUpload'
 import GalleryPicker from '@/components/admin/GalleryPicker'
@@ -16,6 +17,8 @@ import { useAlert } from '@/components/admin/ui/AlertContext'
 import { calculateComparePrice } from '@/utils/discount'
 import { generateSkuCode } from '@/utils/skuGenerator'
 import { useUnsavedChanges } from '@/context/UnsavedChangesContext'
+import { useTags } from '@/hooks/admin-useTags'
+import { TagSelect } from '@/components/admin/TagSelect'
 
 const EMPTY_PRODUCT = {
   name: '', slug: '', description: '', images: [],
@@ -100,8 +103,8 @@ function SkuCard({ sku, index, attributes, onChange, onRemove, onStatusToggle })
               onChange={(e) => handleChange('wholesalePrice', e.target.value || null)} />
             <Input label="Cant. mín. mayorista" type="number" value={sku.wholesaleMinQty || ''}
               onChange={(e) => handleChange('wholesaleMinQty', e.target.value || null)} />
-            <Select label="Estado" value={sku.status}
-              onChange={(e) => handleChange('status', e.target.value)}
+            <DropdownSelect label="Estado" value={sku.status}
+              onChange={(v) => handleChange('status', v)}
               options={[{ value: 'active', label: 'Activo' }, { value: 'draft', label: 'Borrador' }]} />
           </div>
           <ImageUpload images={sku.images || []}
@@ -126,7 +129,7 @@ export default function ProductForm() {
   const [attributes, setAttributes] = useState([])
   const [selectedAttributes, setSelectedAttributes] = useState({})
   const [saving, setSaving] = useState(false)
-  const [tagsInput, setTagsInput] = useState('')
+  const [tagIds, setTagIds] = useState([])
   const [slugManual, setSlugManual] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [showPriceModal, setShowPriceModal] = useState(false)
@@ -134,6 +137,7 @@ export default function ProductForm() {
   const [attrDropdownOpen, setAttrDropdownOpen] = useState(false)
 
   const { isDirty, setIsDirty, confirmLeave } = useUnsavedChanges()
+  const { tags } = useTags()
 
   useEffect(() => {
     api.get('/admin/attributes').then(({ data }) => setAttributes(data)).catch(() => {})
@@ -151,7 +155,7 @@ export default function ProductForm() {
         status: product.status || 'active', tags: product.tags || [],
         categoryId: product.categoryId || '',
       })
-      setTagsInput((product.tags || []).join(', '))
+      setTagIds(product.tagValues?.map(tv => tv.id) || [])
       setSlugManual(true)
 
       if (product.skus?.length > 0) {
@@ -192,11 +196,6 @@ export default function ProductForm() {
     }
     setForm(next)
     setIsDirty(true)
-  }
-
-  const handleTagsChange = (value) => {
-    setTagsInput(value)
-    handleChange('tags', value.split(',').map(t => t.trim()).filter(Boolean))
   }
 
   // ── Atributos (modal) ──
@@ -410,6 +409,7 @@ export default function ProductForm() {
     try {
       const payload = {
         ...form, categoryId: form.categoryId || null,
+        tagIds,
         retailPrice: Number(form.retailPrice) || 0,
         comparePrice: form.comparePrice ? Number(form.comparePrice) : null,
         discountPercentage: form.discountPercentage ? Number(form.discountPercentage) : null,
@@ -517,13 +517,15 @@ export default function ProductForm() {
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <Select label="Estado" value={form.status} onChange={(e) => handleChange('status', e.target.value)}
+          <DropdownSelect label="Estado" value={form.status}
+            onChange={(v) => handleChange('status', v)}
             options={[{ value: 'active', label: 'Activo' }, { value: 'draft', label: 'Borrador' }]} />
-          <Select label="Categoría" value={form.categoryId} onChange={(e) => handleChange('categoryId', e.target.value)}
+          <DropdownSelect label="Categoría" value={form.categoryId}
+            onChange={(v) => handleChange('categoryId', v)}
             options={[{ value: '', label: 'Sin categoría' }, ...categories.map(c => ({ value: c.id, label: c.name }))]} />
         </div>
 
-        <Input label="Tags (separados por coma)" value={tagsInput} onChange={(e) => handleTagsChange(e.target.value)} placeholder="destacado, nuevo, oferta" />
+        <TagSelect tags={tags} selected={tagIds} onChange={setTagIds} />
 
         {/* ═══ ATRIBUTOS DEL PRODUCTO (barra) ═══ */}
         <div className="border-t border-zinc-800 pt-4">

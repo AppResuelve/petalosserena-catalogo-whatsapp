@@ -19,10 +19,13 @@ const PAGE_TITLES = {
   '/dashboard/products': 'Productos',
   '/dashboard/services': 'Servicios',
   '/dashboard/categories': 'Categorías',
+  '/dashboard/tags': 'Etiquetas',
+  '/dashboard/discounts': 'Descuentos',
   '/dashboard/media': 'Galería',
   '/dashboard/settings': 'Configuración',
   '/dashboard/store': 'Tienda',
   '/dashboard/attributes': 'Atributos',
+  '/dashboard/change-requests': 'Solicitar cambio',
 } as Record<string, string>
 
 function AdminShell({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,4 @@
-const { Product, Category, ProductSku, AttributeValue, Attribute } = require('../../models')
+const { Product, Category, ProductSku, AttributeValue, Attribute, TagValue, Tag } = require('../../models')
 
 const skuInclude = {
   model: ProductSku,
@@ -15,7 +15,7 @@ const skuInclude = {
 }
 
 const list = async (query = {}) => {
-  const { page = 1, limit = 50, search, categoryId, categorySlug } = query
+  const { page = 1, limit = 50, search, categoryId, categorySlug, tagIds } = query
   const offset = (page - 1) * limit
 
   const where = { status: 'active' }
@@ -30,9 +30,16 @@ const list = async (query = {}) => {
   const include = [
     { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] },
     skuInclude,
+    { model: TagValue, as: 'tagValues', include: [{ model: Tag, as: 'tag' }] },
   ]
   if (categorySlug) {
     include[0].where = { slug: categorySlug }
+  }
+  if (tagIds) {
+    const ids = Array.isArray(tagIds) ? tagIds : tagIds.split(',').map(Number).filter(Boolean)
+    if (ids.length > 0) {
+      include[2].where = { id: { [require('sequelize').Op.in]: ids } }
+    }
   }
 
   const { count, rows } = await Product.findAndCountAll({
@@ -58,6 +65,7 @@ const getBySlug = async (slug) => {
     include: [
       { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] },
       skuInclude,
+      { model: TagValue, as: 'tagValues', include: [{ model: Tag, as: 'tag' }] },
     ],
   })
   if (!product) {

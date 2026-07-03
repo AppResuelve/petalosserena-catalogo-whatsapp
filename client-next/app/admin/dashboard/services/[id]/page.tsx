@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
-import { Button, Input, Textarea, Select } from '@/components/admin/ui/Form'
+import { Button, Input, Textarea } from '@/components/admin/ui/Form'
+import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { Spinner } from '@/components/admin/ui/Spinner'
 import { useAlert } from '@/components/admin/ui/AlertContext'
@@ -71,7 +72,8 @@ function VariantCard({ variant, index, attributes, onChange, onRemove }) {
           <div className="grid grid-cols-3 gap-3">
             <Input label="Precio" type="number" value={variant.price} onChange={(e) => handleChange('price', e.target.value)} />
             <Input label="Duración (min)" type="number" value={variant.durationMinutes} onChange={(e) => handleChange('durationMinutes', e.target.value)} placeholder="Opcional" />
-            <Select label="Estado" value={variant.status} onChange={(e) => handleChange('status', e.target.value)}
+            <DropdownSelect label="Estado" value={variant.status}
+              onChange={(v) => handleChange('status', v)}
               options={[{ value: 'active', label: 'Activo' }, { value: 'draft', label: 'Borrador' }]} />
           </div>
           <ImageUpload images={variant.images || []} onChange={(imgs) => handleChange('images', imgs)} max={1} folder={`servicios/var-${variant.id || index}`} />
@@ -386,7 +388,8 @@ export default function ServiceForm() {
         <div className="grid grid-cols-2 gap-4">
           <Input label="Precio" type="number" value={form.price} onChange={(e) => handleChange('price', e.target.value)}
             readOnly={variants.length > 0} disabled={variants.length > 0} />
-          <Select label="Estado" value={form.status} onChange={(e) => handleChange('status', e.target.value)}
+          <DropdownSelect label="Estado" value={form.status}
+            onChange={(v) => handleChange('status', v)}
             options={[{ value: 'active', label: 'Activo' }, { value: 'draft', label: 'Borrador' }]} />
         </div>
 

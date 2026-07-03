@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ExternalLink, Globe, AlertTriangle, Pencil } from 'lucide-react'
 import { Spinner } from '@/components/admin/ui/Spinner'
+import { DropdownSelect } from '@/components/admin/ui/DropdownSelect'
 import api from '@/services/admin-api'
 
 const STORE_STATUS = [
@@ -120,16 +121,13 @@ export default function Store() {
       <div className="flex flex-col gap-2 p-4 rounded-xl border bg-zinc-900/50 border-zinc-800">
         <div className="flex items-center gap-3">
           <span className="text-sm text-zinc-400">Estado de la tienda:</span>
-          <select
+          <DropdownSelect
+            options={STORE_STATUS.map(s => ({ value: s.value, label: s.label }))}
             value={status}
-            onChange={(e) => handleStatusChange(e.target.value)}
+            onChange={(v) => handleStatusChange(v as string)}
             disabled={saving}
-            className="appearance-none bg-zinc-800 border border-zinc-700 rounded-lg pl-3 pr-10 py-2 text-sm font-medium text-zinc-200 focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer disabled:opacity-50"
-          >
-            {STORE_STATUS.map(({ value, label }) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+            className="w-44"
+          />
           <span className={`w-2 h-2 rounded-full ${current.dot}`} />
           {saving && <Spinner size="sm" />}
         </div>

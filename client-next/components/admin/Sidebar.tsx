@@ -20,6 +20,11 @@ import {
   MoreHorizontal,
   Eye,
   SlidersHorizontal,
+  Tag,
+  ChevronDown,
+  ChevronRight,
+  FolderOpen,
+  Percent,
 } from "lucide-react";
 import { useAuth } from "@/components/admin/context/AuthContext";
 import { useAlert } from "@/components/admin/ui/AlertContext";
@@ -27,23 +32,40 @@ import { Modal } from "@/components/admin/ui/Modal";
 import api from "@/services/admin-api";
 import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
-const ADMIN_ITEMS = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/dashboard/products", icon: Package, label: "Productos" },
-  { to: "/dashboard/attributes", icon: SlidersHorizontal, label: "Atributos" },
-  { to: "/dashboard/services", icon: Briefcase, label: "Servicios" },
-  { to: "/dashboard/categories", icon: Tags, label: "Categorías" },
-  { to: "/dashboard/media", icon: Image, label: "Galería" },
-  { to: "/dashboard/settings", icon: Settings, label: "Configuración" },
-];
-
-const DEV_ITEM = {
-  to: "/dashboard/change-requests",
-  icon: Wrench,
-  label: "Solicitar cambio",
-};
-
-const STORE_ITEM = { to: "/dashboard/store", icon: Store, label: "Tienda" };
+const NAV_CONFIG = [
+  {
+    group: "General",
+    items: [
+      { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      {
+        label: "Catálogo",
+        icon: FolderOpen,
+        children: [
+          { to: "/dashboard/products", icon: Package, label: "Productos" },
+          { to: "/dashboard/categories", icon: Tags, label: "Categorías" },
+          { to: "/dashboard/tags", icon: Tag, label: "Etiquetas" },
+          { to: "/dashboard/discounts", icon: Percent, label: "Descuentos" },
+        ],
+      },
+      { to: "/dashboard/services", icon: Briefcase, label: "Servicios" },
+      { to: "/dashboard/attributes", icon: SlidersHorizontal, label: "Atributos" },
+      { to: "/dashboard/media", icon: Image, label: "Galería" },
+      { to: "/dashboard/settings", icon: Settings, label: "Configuración" },
+    ],
+  },
+  {
+    group: "Sitio público",
+    items: [
+      { to: "/dashboard/store", icon: Store, label: "Tienda" },
+    ],
+  },
+  {
+    group: "Desarrollador",
+    items: [
+      { to: "/dashboard/change-requests", icon: Wrench, label: "Solicitar cambio" },
+    ],
+  },
+]
 
 export default function Sidebar({ open, onClose, logoUrl }) {
   const { user, logout } = useAuth();
@@ -65,10 +87,27 @@ export default function Sidebar({ open, onClose, logoUrl }) {
   const [pwError, setPwError] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openSubmenus, setOpenSubmenus] = useState<string[]>([]);
+
+  const toggleSubmenu = (label: string) => {
+    setOpenSubmenus(prev =>
+      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
+    )
+  }
 
   useEffect(() => {
     if (!open) setMenuOpen(false);
   }, [open]);
+
+  useEffect(() => {
+    NAV_CONFIG.forEach(group => {
+      group.items.forEach(item => {
+        if (item.children?.some(child => pathname.startsWith(child.to))) {
+          setOpenSubmenus(prev => prev.includes(item.label) ? prev : [...prev, item.label])
+        }
+      })
+    })
+  }, [pathname])
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -107,11 +146,7 @@ export default function Sidebar({ open, onClose, logoUrl }) {
     <>
       {/* Header */}
       <div className="flex items-center justify-between px-5 h-16 border-b border-zinc-800 shrink-0">
-        <Link
-          href="/dashboard"
-          onClick={onClose}
-          className="flex items-center gap-3"
-        >
+        <div className="flex items-center gap-3">
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -126,7 +161,7 @@ export default function Sidebar({ open, onClose, logoUrl }) {
           <span className="font-semibold text-zinc-100 text-sm">
             Administración
           </span>
-        </Link>
+        </div>
         <button
           onClick={onClose}
           className="lg:hidden p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
@@ -137,69 +172,76 @@ export default function Sidebar({ open, onClose, logoUrl }) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        <p className="px-3 pt-2 text-[12px] font-semibold text-zinc-600 uppercase tracking-wider">
-          General
-        </p>
-        {ADMIN_ITEMS.map(({ to, icon: Icon, label }) => (
-          <Link
-            key={to}
-            href={to}
-            onClick={async (e) => {
-              e.preventDefault()
-              if (await confirmLeave()) { onClose(); router.push(to) }
-            }}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-md font-medium transition-colors ${
-              pathname === to
-                ? "bg-cyan-500/10 text-cyan-400"
-                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </Link>
+        {NAV_CONFIG.map((group, gi) => (
+          <div key={group.group}>
+            {gi > 0 && <div className="border-t border-zinc-800/50" />}
+            <p className="px-3 pt-2 text-[12px] font-semibold text-zinc-600 uppercase tracking-wider">
+              {group.group}
+            </p>
+            {group.items.map((item) => {
+              if (item.children) {
+                const isOpen = openSubmenus.includes(item.label)
+                const isActive = item.children.some(c => pathname.startsWith(c.to))
+                return (
+                  <div key={item.label}>
+                    <button
+                      onClick={() => toggleSubmenu(item.label)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-md font-medium transition-colors ${
+                        isActive
+                          ? "bg-cyan-500/10 text-cyan-400"
+                          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                    {isOpen && (
+                      <div className="ml-4">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.to}
+                            href={child.to}
+                            onClick={async (e) => {
+                              e.preventDefault()
+                              if (await confirmLeave()) { onClose(); router.push(child.to) }
+                            }}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              pathname.startsWith(child.to)
+                                ? "bg-cyan-500/10 text-cyan-400"
+                                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                            }`}
+                          >
+                            <child.icon className="w-3.5 h-3.5" />
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+              return (
+                <Link
+                  key={item.to}
+                  href={item.to}
+                  onClick={async (e) => {
+                    e.preventDefault()
+                    if (await confirmLeave()) { onClose(); router.push(item.to) }
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-md font-medium transition-colors ${
+                    pathname === item.to
+                      ? "bg-cyan-500/10 text-cyan-400"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
         ))}
-
-        <div className="border-t border-zinc-800/50" />
-
-        <p className="px-3 pt-2 text-[12px] font-semibold text-zinc-600 uppercase tracking-wider">
-          Sitio público
-        </p>
-        <Link
-          href={STORE_ITEM.to}
-          onClick={async (e) => {
-            e.preventDefault()
-            if (await confirmLeave()) { onClose(); router.push(STORE_ITEM.to) }
-          }}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-md font-medium transition-colors ${
-            pathname === STORE_ITEM.to
-              ? "bg-cyan-500/10 text-cyan-400"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-          }`}
-        >
-          <Store className="w-4 h-4" />
-          {STORE_ITEM.label}
-        </Link>
-
-        <div className="border-t border-zinc-800/50" />
-
-        <p className="px-3 pt-2 text-[12px] font-semibold text-zinc-600 uppercase tracking-wider">
-          Desarrollador
-        </p>
-        <Link
-          href={DEV_ITEM.to}
-          onClick={async (e) => {
-            e.preventDefault()
-            if (await confirmLeave()) { onClose(); router.push(DEV_ITEM.to) }
-          }}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-md font-medium transition-colors ${
-            pathname === DEV_ITEM.to
-              ? "bg-cyan-500/10 text-cyan-400"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-          }`}
-        >
-          <Wrench className="w-4 h-4" />
-          {DEV_ITEM.label}
-        </Link>
       </nav>
 
       {/* User + dropdown */}
