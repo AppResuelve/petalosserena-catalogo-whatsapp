@@ -153,6 +153,13 @@ const create = async (data) => {
     data.slug = slugify(data.name);
   }
 
+  if (data.slug) {
+    const existing = await Product.findOne({ where: { slug: data.slug } });
+    if (existing) {
+      throw Object.assign(new Error('Ya existe un producto con ese slug'), { status: 400 });
+    }
+  }
+
   const { comparePrice, discountPercentage } = resolveDiscountFields(
     data.retailPrice,
     data.comparePrice,
