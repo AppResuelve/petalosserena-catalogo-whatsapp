@@ -156,7 +156,18 @@ const list = async (query = {}) => {
 };
 
 const getBySlug = async (slug) => {
-  /* Tu código se mantiene igual */
+  const product = await Product.findOne({
+    where: { slug, status: 'active' },
+    include: [
+      { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] },
+      skuInclude,
+      { model: TagValue, as: 'tagValues', include: [{ model: Tag, as: 'tag' }] },
+    ],
+  });
+  if (!product) {
+    throw Object.assign(new Error('Producto no encontrado'), { status: 404 });
+  }
+  return product;
 };
 
 module.exports = { list, getBySlug };
