@@ -27,6 +27,12 @@ export const ordersService = {
   },
 }
 
+export const tagsService = {
+  list(params = {}) {
+    return api.get("/store/tags", { params }).then((r) => r.data)
+  },
+}
+
 export const servicesService = {
   list(params = {}) {
     return api.get("/store/services", { params }).then((r) => r.data)

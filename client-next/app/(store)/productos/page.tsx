@@ -1,15 +1,16 @@
 // @ts-nocheck
-'use client'
+"use client";
 // @ts-nocheck
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { SlidersHorizontal, MessageCircle } from "lucide-react";
+import { SlidersHorizontal, MessageCircle, X, ChevronDown } from "lucide-react";
 import { content } from "@/data/siteData";
 import { useStore } from "@/context/StoreContext";
 import { useProducts } from "@/hooks/useProducts";
+import { tagsService } from "@/services/storeService";
 import { ProductGrid } from "@/components/store/ProductGrid";
 import { SearchBar } from "@/components/store/SearchBar";
-import { CategoryFilter } from "@/components/store/CategoryFilter";
+import { TagFilter } from "@/components/store/TagFilter";
 
 /* ── Pétalo decorativo — firma visual ── */
 function PetalDeco({ className = "", style = {} }) {
@@ -241,16 +242,16 @@ function Pagination({ page, totalPages, onPageChange }) {
 export default function Products() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const setSearchParam = (params: Record<string, string>) => {
-    const sp = new URLSearchParams()
-    Object.entries(params).forEach(([k, v]) => { if (v) sp.set(k, v) })
-    router.replace(sp.toString() ? `?${sp.toString()}` : window.location.pathname, { scroll: false })
-  }
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [tags, setTags] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [openCategories, setOpenCategories] = useState(true);
+  const [openTags, setOpenTags] = useState(true);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [page, setPage] = useState(1);
+  const initializedFromUrl = useRef(false);
   const { store, categories } = useStore();
 
   const { title, subtitle, noResults, clearFilters } = content.products;
@@ -260,19 +261,52 @@ export default function Products() {
   const { products, total, totalPages, loading } = useProducts({
     search: searchQuery || undefined,
     categoryId,
+    tagIds: selectedTagIds.length > 0 ? selectedTagIds.join(",") : undefined,
     page,
     limit: 20,
   });
 
   useEffect(() => {
+    const params = { ...(categoryId ? { categoryId } : {}) };
+    if (selectedTagIds.length > 0) params.tagIds = selectedTagIds.join(",");
+    tagsService
+      .list(params)
+      .then(setTags)
+      .catch(() => setTags([]));
+  }, [categoryId, selectedTagIds]);
+
+  // ── URL sync: solo después de hidratar desde URL ──
+  useEffect(() => {
+    if (!initializedFromUrl.current) return;
+    const sp = new URLSearchParams();
+    if (selectedCategory !== "Todos") {
+      const cat = categories.find((c) => String(c.id) === selectedCategory);
+      if (cat) sp.set("cat", cat.name);
+    }
+    if (selectedTagIds.length > 0) sp.set("tags", selectedTagIds.join(","));
+    router.replace(
+      sp.toString() ? `?${sp.toString()}` : window.location.pathname,
+      { scroll: false },
+    );
+  }, [selectedCategory, selectedTagIds]);
+
+  // ── Read URL params on mount — una sola vez cuando categories cargó ──
+  useEffect(() => {
+    if (initializedFromUrl.current || categories.length === 0) return;
     const cat = searchParams?.get("cat") || "";
     if (cat) {
       const found = categories.find((c) => c.slug === cat || c.name === cat);
       if (found) setSelectedCategory(String(found.id));
     }
+    const tagsParam = searchParams?.get("tags") || "";
+    if (tagsParam) {
+      setSelectedTagIds(tagsParam.split(",").map(Number).filter(Boolean));
+    }
+    initializedFromUrl.current = true;
   }, [searchParams, categories]);
 
-  const hasActiveFilters = searchQuery || selectedCategory !== "Todos";
+  const hasActiveFilters =
+    searchQuery || selectedCategory !== "Todos" || selectedTagIds.length > 0;
 
   useEffect(() => {
     document.body.style.overflow = isFilterOpen ? "hidden" : "";
@@ -283,22 +317,33 @@ export default function Products() {
 
   const handleCategoryChange = (category) => {
     setPage(1);
+    setSelectedTagIds([]);
     if (category === "Todos") {
       setSelectedCategory("Todos");
-      setSearchParam({});
     } else {
       const cat = categories.find((c) => c.name === category);
-      if (cat) {
-        setSelectedCategory(String(cat.id));
-        setSearchParam({ cat: cat.name });
-      }
+      if (cat) setSelectedCategory(String(cat.id));
     }
+  };
+
+  const handleToggleTag = (tagValueId, tagId) => {
+    setPage(1);
+    const tagGroup = tags.find((t) => t.id === tagId);
+    const groupValueIds = tagGroup ? tagGroup.values.map((v) => v.id) : [];
+    setSelectedTagIds((prev) => {
+      const existingInGroup = prev.find((id) => groupValueIds.includes(id));
+      if (existingInGroup === tagValueId)
+        return prev.filter((id) => id !== tagValueId);
+      if (existingInGroup)
+        return prev.map((id) => (id === existingInGroup ? tagValueId : id));
+      return [...prev, tagValueId];
+    });
   };
 
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("Todos");
-    setSearchParam({});
+    setSelectedTagIds([]);
     setPage(1);
   };
 
@@ -313,7 +358,7 @@ export default function Products() {
         style={{
           backgroundColor: "var(--color-background)",
           paddingTop: "5rem",
-          paddingBottom: "4rem",
+          paddingBottom: "1rem",
         }}
       >
         {/* Pétalos decorativos */}
@@ -369,42 +414,116 @@ export default function Products() {
               {subtitle}
             </p>
           )}
-
-          {/* Línea decorativa */}
-          <div className="flex items-center gap-3 mt-5">
-            <div
-              className="h-px w-10"
-              style={{ backgroundColor: "var(--color-border-hover)" }}
-            />
-            <div
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: "var(--color-lila)", opacity: 0.7 }}
-            />
-            <div
-              className="h-px w-24"
-              style={{ backgroundColor: "var(--color-border-hover)" }}
-            />
-          </div>
         </div>
       </section>
 
       {/* ══ CONTENIDO ══ */}
-      <section className="bg-white pb-20 px-4 sm:px-6 lg:px-8 pt-10">
+      <section className="bg-white pb-20 px-4 sm:px-6 lg:px-8 pt-4 lg:pt-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-0 lg:gap-8">
             {/* Sidebar */}
-            <CategoryFilter
-              categories={categoryLabels}
-              selectedCategory={
-                selectedCategory === "Todos"
-                  ? "Todos"
-                  : categories.find((c) => String(c.id) === selectedCategory)
-                      ?.name || "Todos"
-              }
-              onSelectCategory={handleCategoryChange}
-              isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-            />
+            <div className="w-72 flex-shrink-0">
+              {/* Mobile backdrop */}
+              {isFilterOpen && (
+                <div
+                  className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
+                  onClick={() => setIsFilterOpen(false)}
+                />
+              )}
+
+              {/* Sidebar container */}
+              <aside
+                className={`fixed lg:static inset-y-0 left-0 z-[70] lg:z-auto w-72 bg-[var(--color-surface)] lg:bg-transparent border-r lg:border-r-0 border-[var(--color-border)] transform transition-transform duration-300 lg:transform-none ${
+                  isFilterOpen
+                    ? "translate-x-0"
+                    : "-translate-x-full lg:translate-x-0"
+                }`}
+              >
+                <div className="flex flex-col h-full p-6 lg:p-0 overflow-y-auto">
+                  {/* Mobile header */}
+                  <div className="flex items-center justify-between mb-6 lg:hidden">
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      Filtrar por
+                    </h3>
+                    <button
+                      onClick={() => setIsFilterOpen(false)}
+                      className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Categories section */}
+                  <div className="mb-6">
+                    <button
+                      onClick={() => setOpenCategories(!openCategories)}
+                      className="flex items-center justify-between w-full text-left mb-3"
+                    >
+                      <h3
+                        className="text-sm font-semibold text-[var(--color-text-primary)]"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        Categorías
+                      </h3>
+                      <ChevronDown
+                        className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${openCategories ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {openCategories && (
+                      <div className="space-y-2">
+                        {categoryLabels.map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => {
+                              handleCategoryChange(category);
+                            }}
+                            className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                              (selectedCategory === "Todos"
+                                ? "Todos"
+                                : categories.find(
+                                    (c) => String(c.id) === selectedCategory,
+                                  )?.name || "Todos") === category
+                                ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
+                                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-secondary)]/10"
+                            }`}
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tags section */}
+                  {tags.length > 0 && (
+                    <div>
+                      <button
+                        onClick={() => setOpenTags(!openTags)}
+                        className="flex items-center justify-between w-full text-left mb-3"
+                      >
+                        <h3
+                          className="text-sm font-semibold text-[var(--color-text-primary)]"
+                          style={{ fontFamily: "var(--font-body)" }}
+                        >
+                          Filtrar por
+                        </h3>
+                        <ChevronDown
+                          className={`w-4 h-4 text-[var(--color-text-secondary)] transition-transform ${openTags ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {openTags && (
+                        <TagFilter
+                          tags={tags}
+                          selectedTagIds={selectedTagIds}
+                          selectionMode="single"
+                          onToggleTag={handleToggleTag}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </aside>
+            </div>
 
             <div className="flex-1">
               {/* Search + filtros mobile */}
@@ -444,6 +563,41 @@ export default function Products() {
                   </button>
                 </div>
               </div>
+
+              {/* Mobile chips */}
+              {selectedTagIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {selectedTagIds.map((id) => {
+                    let label = "";
+                    for (const tag of tags) {
+                      const found = tag.values.find((v) => v.id === id);
+                      if (found) {
+                        label = `${tag.name}: ${found.value}`;
+                        break;
+                      }
+                    }
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          const tagGroup = tags.find((t) =>
+                            t.values.some((v) => v.id === id),
+                          );
+                          if (tagGroup) handleToggleTag(id, tagGroup.id);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+                        style={{
+                          backgroundColor: "var(--color-primary-light)",
+                          color: "var(--color-primary)",
+                        }}
+                      >
+                        {label}
+                        <X className="w-3 h-3" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Contador + limpiar */}
               {hasActiveFilters && (

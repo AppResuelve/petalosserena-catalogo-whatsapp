@@ -1,61 +1,78 @@
-const { Tag, TagValue, Product } = require('../../models')
+const { Tag, TagValue, sequelize } = require("../../models");
+const { Op } = require("sequelize");
 
-const list = async (categoryId) => {
+const list = async (categoryId, activeTagIds = []) => {
   const tags = await Tag.findAll({
-    include: [{
-      model: TagValue,
-      as: 'values',
-      order: [['sort_order', 'ASC']],
-    }],
-    order: [['sort_order', 'ASC']],
-  })
-
-  // Build a map of tag_value_id → isAvailable
-  const isAvailableMap = new Map()
-
-  if (tags.length === 0) return []
-
-  const allValueIds = tags.flatMap(t => (t.values || []).map(v => v.id))
-
-  if (allValueIds.length > 0) {
-    const where = { status: 'active' }
-    if (categoryId) {
-      where.categoryId = Number(categoryId)
-    }
-
-    const products = await Product.findAll({
-      where,
-      include: [{
+    include: [
+      {
         model: TagValue,
-        as: 'tagValues',
-        where: { id: allValueIds },
-        attributes: ['id'],
-      }],
-      attributes: ['id'],
-    })
+        as: "values",
+        attributes: ["id", "value", "sortOrder", "tagId"],
+      },
+    ],
+    order: [
+      ["sortOrder", "ASC"],
+      ["values", "sortOrder", "ASC"],
+    ],
+  });
 
-    const availableSet = new Set()
-    products.forEach(p => {
-      (p.tagValues || []).forEach(tv => availableSet.add(tv.id))
-    })
-
-    allValueIds.forEach(id => {
-      isAvailableMap.set(id, availableSet.has(id))
-    })
+  const activeByGroup = {};
+  if (activeTagIds.length > 0) {
+    for (const tag of tags) {
+      for (const val of tag.values) {
+        if (activeTagIds.includes(val.id)) {
+          if (!activeByGroup[val.tagId]) activeByGroup[val.tagId] = [];
+          activeByGroup[val.tagId].push(val.id);
+        }
+      }
+    }
   }
 
-  return tags.map(tag => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    sortOrder: tag.sortOrder,
-    values: (tag.values || []).map(v => ({
-      id: v.id,
-      value: v.value,
-      sortOrder: v.sortOrder,
-      isAvailable: isAvailableMap.get(v.id) ?? false,
-    })),
-  }))
-}
+  // FIX: Sanitizamos el categoryId para evitar el temido 'undefined' literal
+  const validCategoryId =
+    categoryId && categoryId !== "undefined" && categoryId !== "null"
+      ? Number(categoryId)
+      : null;
 
-module.exports = { list }
+  for (const tag of tags) {
+    for (const tv of tag.values) {
+      const testByGroup = {};
+      for (const [groupId, ids] of Object.entries(activeByGroup)) {
+        testByGroup[groupId] = [...ids];
+      }
+
+      // Reemplazamos cualquier selección previa de este grupo con SOLO el candidato
+      testByGroup[tag.id] = [tv.id];
+
+      const intersects = Object.values(testByGroup).map(
+        (ids) =>
+          `SELECT "product_id" FROM "product_tags" WHERE "tag_value_id" IN (${ids.join(",")})`,
+      );
+
+      // Usamos la variable ya limpia y sanitizada
+      const categoryFilter = validCategoryId
+        ? `AND "Product"."category_id" = ${validCategoryId}`
+        : "";
+
+      const checkQuery = `
+        SELECT COUNT(*) as count
+        FROM (
+          SELECT "Product"."id"
+          FROM "products" AS "Product"
+          WHERE "Product"."status" = 'active'
+            ${categoryFilter}
+            AND "Product"."id" IN (${intersects.join(" INTERSECT ")})
+        ) AS filtered
+      `;
+
+      const result = await sequelize.query(checkQuery, {
+        type: sequelize.QueryTypes.SELECT,
+      });
+      tv.dataValues.isAvailable = parseInt(result[0]?.count || "0") > 0;
+    }
+  }
+
+  return tags;
+};
+
+module.exports = { list };
