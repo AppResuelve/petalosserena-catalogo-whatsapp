@@ -121,7 +121,13 @@ export default function ServiceDetailClient({ service }: { service: any }) {
       <section className="relative overflow-hidden px-4 sm:px-6 lg:px-8" style={{ backgroundColor: "var(--color-background)", paddingTop: "5rem", paddingBottom: "3rem" }}>
         <PetalDeco className="absolute top-6 right-[7%] text-[var(--color-lila)] hidden md:block" style={{ width: 100, opacity: 0.08 }} />
         <div className="relative max-w-4xl mx-auto">
-          <button onClick={() => router.back()} className="inline-flex items-center gap-2 mb-8 transition-colors" style={{ color: "var(--color-text-muted)" }} onMouseEnter={e => e.currentTarget.style.color = "var(--color-primary)"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-muted)"}>
+          <button onClick={() => {
+            if (window.history.length > 1) {
+              router.back()
+            } else {
+              router.push('/servicios')
+            }
+          }} className="inline-flex items-center gap-2 mb-8 transition-colors" style={{ color: "var(--color-text-muted)" }} onMouseEnter={e => e.currentTarget.style.color = "var(--color-primary)"} onMouseLeave={e => e.currentTarget.style.color = "var(--color-text-muted)"}>
             <ArrowLeft className="w-4 h-4" />{content.serviceDetail.backTo}
           </button>
           <h1 className="mb-3" style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(2.25rem, 5vw, 3rem)", fontWeight: 400, color: "var(--color-text-primary)" }}>{service.name}</h1>
