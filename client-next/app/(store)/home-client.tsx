@@ -216,13 +216,23 @@ export default function HomeClient() {
     return () => clearInterval(id);
   }, []);
 
-  const featuredProducts = useMemo(
-    () =>
-      Object.values(productsMap)
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 5),
-    [productsMap],
-  );
+  const featuredProducts = useMemo(() => {
+    const tagged = Object.values(productsMap)
+      .filter((p: any) =>
+        p.tagValues?.some(
+          (tv: any) => tv.tag?.name?.toLowerCase() === "destacados"
+        )
+      )
+      .slice(0, 10);
+
+    if (tagged.length > 0) return tagged;
+
+    return Object.values(productsMap)
+      .sort((a: any, b: any) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      .slice(0, 6);
+  }, [productsMap]);
 
   return (
     <main className="overflow-hidden">
