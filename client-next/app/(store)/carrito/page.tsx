@@ -58,7 +58,7 @@ function CartEmpty({ emptyTitle, emptyMessage, browseProducts }) {
         <div className="relative max-w-7xl mx-auto">
           <button
             onClick={() => {
-              if (window.history.length > 1) router.back()
+              if (document.referrer && document.referrer.startsWith(window.location.origin)) router.back()
               else router.push('/productos')
             }}
             className="inline-flex items-center gap-1.5 text-xs font-semibold
@@ -217,7 +217,7 @@ export default function Cart() {
         <div className="relative max-w-6xl mx-auto">
           <button
             onClick={() => {
-              if (window.history.length > 1) router.back()
+              if (document.referrer && document.referrer.startsWith(window.location.origin)) router.back()
               else router.push('/productos')
             }}
             className="inline-flex items-center gap-1.5 text-xs font-semibold
